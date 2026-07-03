@@ -1,24 +1,5 @@
 import { useState } from "react";
 
-const DEFAULT_REMINDERS = {
-  shiftStart: true,
-  break: true,
-  endShift: true,
-  incompleteJob: true,
-  unfinishedNotes: true,
-  exportReminder: true,
-  dailySummary: true,
-  weeklySummary: true,
-  shiftStartTime: "06:00",
-  breakAfterMinutes: 180,
-  endShiftTime: "18:00",
-  incompleteJobMinutes: 45,
-  exportReminderTime: "19:00",
-  dailySummaryTime: "20:30",
-  weeklySummaryDay: 1,
-  weeklySummaryTime: "20:30",
-};
-
 const UserSettings = ({ 
   notificationPreferences,
   onUpdateNotificationPreferences,
@@ -43,16 +24,11 @@ const UserSettings = ({
   const [notificationEnabled, setNotificationEnabled] = useState(notificationPreferences?.enabled ?? true);
   const [notificationPeriod, setNotificationPeriod] = useState(notificationPreferences?.periodDays ?? 7);
   const [importFileName, setImportFileName] = useState("");
-  const [reminders, setReminders] = useState({
-    ...DEFAULT_REMINDERS,
-    ...(notificationPreferences?.reminders || {}),
-  });
 
   const handleNotificationPreferencesSave = () => {
     const success = onUpdateNotificationPreferences({
       enabled: notificationEnabled,
       periodDays: notificationPeriod,
-      reminders,
     });
     if (success) {
       setMessage("Notification preferences updated successfully.");
@@ -128,115 +104,6 @@ const UserSettings = ({
             </button>
           </div>
 
-          {notificationEnabled && (
-            <div className="mt-4 rounded-xl border border-slate-700 bg-slate-950/40 p-4">
-              <h3 className="mb-3 font-medium text-slate-100">Reminder Engine</h3>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <ReminderToggle
-                  label="Shift Start Reminder"
-                  checked={reminders.shiftStart}
-                  onChange={(value) => setReminders((prev) => ({ ...prev, shiftStart: value }))}
-                />
-                <ReminderToggle
-                  label="Break Reminder"
-                  checked={reminders.break}
-                  onChange={(value) => setReminders((prev) => ({ ...prev, break: value }))}
-                />
-                <ReminderToggle
-                  label="End Shift Reminder"
-                  checked={reminders.endShift}
-                  onChange={(value) => setReminders((prev) => ({ ...prev, endShift: value }))}
-                />
-                <ReminderToggle
-                  label="Incomplete Job Reminder"
-                  checked={reminders.incompleteJob}
-                  onChange={(value) => setReminders((prev) => ({ ...prev, incompleteJob: value }))}
-                />
-                <ReminderToggle
-                  label="Unfinished Notes Reminder"
-                  checked={reminders.unfinishedNotes}
-                  onChange={(value) => setReminders((prev) => ({ ...prev, unfinishedNotes: value }))}
-                />
-                <ReminderToggle
-                  label="Export Reminder"
-                  checked={reminders.exportReminder}
-                  onChange={(value) => setReminders((prev) => ({ ...prev, exportReminder: value }))}
-                />
-                <ReminderToggle
-                  label="Daily Summary Notification"
-                  checked={reminders.dailySummary}
-                  onChange={(value) => setReminders((prev) => ({ ...prev, dailySummary: value }))}
-                />
-                <ReminderToggle
-                  label="Weekly Summary Notification"
-                  checked={reminders.weeklySummary}
-                  onChange={(value) => setReminders((prev) => ({ ...prev, weeklySummary: value }))}
-                />
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="text-sm text-slate-300">
-                  Shift start time
-                  <input
-                    type="time"
-                    value={reminders.shiftStartTime}
-                    onChange={(e) => setReminders((prev) => ({ ...prev, shiftStartTime: e.target.value }))}
-                    className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100"
-                  />
-                </label>
-                <label className="text-sm text-slate-300">
-                  End shift time
-                  <input
-                    type="time"
-                    value={reminders.endShiftTime}
-                    onChange={(e) => setReminders((prev) => ({ ...prev, endShiftTime: e.target.value }))}
-                    className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100"
-                  />
-                </label>
-                <label className="text-sm text-slate-300">
-                  Daily summary time
-                  <input
-                    type="time"
-                    value={reminders.dailySummaryTime}
-                    onChange={(e) => setReminders((prev) => ({ ...prev, dailySummaryTime: e.target.value }))}
-                    className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100"
-                  />
-                </label>
-                <label className="text-sm text-slate-300">
-                  Weekly summary time
-                  <input
-                    type="time"
-                    value={reminders.weeklySummaryTime}
-                    onChange={(e) => setReminders((prev) => ({ ...prev, weeklySummaryTime: e.target.value }))}
-                    className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100"
-                  />
-                </label>
-                <label className="text-sm text-slate-300">
-                  Break reminder (minutes)
-                  <input
-                    type="number"
-                    min={30}
-                    step={15}
-                    value={reminders.breakAfterMinutes}
-                    onChange={(e) => setReminders((prev) => ({ ...prev, breakAfterMinutes: Number(e.target.value) || 180 }))}
-                    className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100"
-                  />
-                </label>
-                <label className="text-sm text-slate-300">
-                  Incomplete job threshold (minutes)
-                  <input
-                    type="number"
-                    min={15}
-                    step={5}
-                    value={reminders.incompleteJobMinutes}
-                    onChange={(e) => setReminders((prev) => ({ ...prev, incompleteJobMinutes: Number(e.target.value) || 45 }))}
-                    className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100"
-                  />
-                </label>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="mb-6">
@@ -360,12 +227,3 @@ const UserSettings = ({
 };
 
 export default UserSettings;
-
-function ReminderToggle({ label, checked, onChange }) {
-  return (
-    <label className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm text-slate-200">
-      <span>{label}</span>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-    </label>
-  );
-}
