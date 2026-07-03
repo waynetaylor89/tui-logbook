@@ -34,6 +34,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
+      manifestFilename: 'manifest-v3.webmanifest',
       workbox: {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
