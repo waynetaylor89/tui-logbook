@@ -33,23 +33,14 @@ export default defineConfig({
 
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      injectRegister: null,
       manifestFilename: 'manifest-v3.webmanifest',
       workbox: {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        navigateFallback: 'index.html',
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2,ttf,eot}"],
         runtimeCaching: [
-          {
-            urlPattern: ({ request }) => request.mode === "navigate",
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "app-shell-cache",
-              networkTimeoutSeconds: 3,
-            },
-          },
           {
             urlPattern: ({ url }) => /icon-.*\.png$/i.test(url.pathname),
             handler: "CacheFirst",
