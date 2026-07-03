@@ -23,7 +23,7 @@ export const analyzeImportFile = async ({ file, currentHistory, currentUser }) =
     };
   }
 
-  if (name.endsWith(".csv")) {
+  if (name.endsWith(".csv") || name.endsWith(".txt")) {
     const text = await file.text();
     const rows = parseMovementsCsv(text);
     const existingKeys = new Set(flattenHistory(currentHistory).map((entry) => movementDuplicateKey(entry)));
@@ -51,5 +51,5 @@ export const analyzeImportFile = async ({ file, currentHistory, currentUser }) =
     };
   }
 
-  throw new Error("Unsupported file type. Please use CSV or JSON.");
+  throw new Error("Unsupported file type. Please use CSV, TXT, or JSON.");
 };

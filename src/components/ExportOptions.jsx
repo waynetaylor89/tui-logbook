@@ -16,7 +16,7 @@ const ExportOptions = ({
 
   const handleImportCsvClick = () => {
     if (!onImportCsv) {
-      toast.warning("CSV import is not available here.");
+      toast.warning("CSV/TXT import is not available here.");
       return;
     }
     fileInputRef.current?.click();
@@ -29,14 +29,14 @@ const ExportOptions = ({
     try {
       const rows = await parseCsvFromFile(file);
       if (!Array.isArray(rows) || rows.length === 0) {
-        toast.warning("No rows found in CSV file.");
+        toast.warning("No rows found in CSV/TXT file.");
         return;
       }
 
       onImportCsv(rows);
       if (onExportComplete) onExportComplete("import-csv");
     } catch (error) {
-      toast.error(`CSV import failed: ${error.message}`);
+      toast.error(`CSV/TXT import failed: ${error.message}`);
     } finally {
       event.target.value = "";
     }
@@ -387,18 +387,18 @@ const ExportOptions = ({
         <input
           ref={fileInputRef}
           type="file"
-          accept=".csv,text/csv"
+          accept=".csv,.txt,text/csv,text/plain"
           className="hidden"
           onChange={handleImportCsvFile}
         />
 
-        {/* CSV Import */}
+        {/* CSV/TXT Import */}
         <button
           onClick={handleImportCsvClick}
           disabled={isExporting}
           className="flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-3 text-white transition-colors hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-slate-700"
         >
-          ⬆️ Import CSV
+          ⬆️ Import CSV/TXT
         </button>
 
         {/* PDF Export */}

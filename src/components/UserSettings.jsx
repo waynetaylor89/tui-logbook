@@ -131,14 +131,14 @@ const UserSettings = ({
 
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <label className="cursor-pointer rounded-md bg-cyan-600 px-3 py-2 text-center text-white hover:bg-cyan-500 sm:col-span-3">
-                Import CSV
-                <input type="file" accept=".csv,text/csv" className="hidden" onChange={handleCsvImportSelection} />
+                Import CSV/TXT
+                <input type="file" accept=".csv,.txt,text/csv,text/plain" className="hidden" onChange={handleCsvImportSelection} />
               </label>
             </div>
 
             <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/60 p-3 text-sm text-slate-300">
               <div className="font-medium text-slate-100">Import Logbook</div>
-              <div className="mt-1">Supports CSV and JSON.</div>
+              <div className="mt-1">Supports CSV, TXT, and JSON.</div>
               {importFileName && <div className="mt-2">Selected file: {importFileName}</div>}
               {importPreview && (
                 <div className="mt-2">
