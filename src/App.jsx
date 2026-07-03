@@ -259,18 +259,6 @@ export default function AircraftMovementLogbook() {
       const createdTimestamp = getEntryCreatedAtTimestamp(entry);
       if (Number.isFinite(createdTimestamp) && createdTimestamp > 0) {
         latest = latest ? Math.max(latest, createdTimestamp) : createdTimestamp;
-        return;
-      }
-
-      const idTimestamp = Number(String(entry.id || "").split("-")[0]);
-      if (Number.isFinite(idTimestamp) && idTimestamp > 0) {
-        latest = latest ? Math.max(latest, idTimestamp) : idTimestamp;
-        return;
-      }
-
-      const fallback = new Date(`${entry.createdAt || ""}`).getTime();
-      if (Number.isFinite(fallback)) {
-        latest = latest ? Math.max(latest, fallback) : fallback;
       }
     });
 

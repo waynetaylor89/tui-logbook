@@ -2,6 +2,23 @@ import { useState } from "react";
 
 const DEFAULT_DATE_TEXT = "01.01.2026";
 
+const formatDisplayDate = (value) => {
+  const rawValue = String(value || "").trim();
+  if (!rawValue) return DEFAULT_DATE_TEXT;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
+    const [year, month, day] = rawValue.split("-");
+    return `${day}.${month}.${year}`;
+  }
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(rawValue)) {
+    const [day, month, year] = rawValue.split("/");
+    return `${day}.${month}.${year}`;
+  }
+
+  return rawValue;
+};
+
 export default function RecordsPanel({
   paginatedHistory,
   deleteEntry,
@@ -152,7 +169,7 @@ export default function RecordsPanel({
         )}
 
         {paginatedHistory.map((item) => {
-          const displayDate = item.movementDate || item.date || DEFAULT_DATE_TEXT;
+          const displayDate = formatDisplayDate(item.movementDate || item.date || DEFAULT_DATE_TEXT);
           const displayTime = item.movementTime || item.time || "";
           const editedLabel =
             item.updatedAt && item.updatedBy
@@ -165,9 +182,9 @@ export default function RecordsPanel({
               className="rounded-xl border border-slate-700 bg-slate-900/50 p-4"
             >
 
-              <div className="grid grid-cols-[minmax(0,1fr)_minmax(180px,280px)_auto] items-start gap-4">
+              <div className="flex flex-col gap-3 md:grid md:grid-cols-[minmax(0,1fr)_minmax(180px,220px)] md:items-start lg:grid-cols-[minmax(0,1fr)_minmax(180px,240px)_auto] lg:gap-4">
 
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0">
                   <div className="font-bold text-slate-100">
                     {item.aircraft}
                   </div>
@@ -177,14 +194,14 @@ export default function RecordsPanel({
                   </div>
                 </div>
 
-                <div className="flex min-h-[52px] items-center justify-center pt-1 text-center text-sm text-slate-300">
+                <div className="flex min-h-[52px] items-center justify-center text-center text-sm text-slate-300 md:pt-1">
                   <div className="rounded-lg border border-slate-700/80 bg-slate-950/60 px-4 py-2 leading-tight">
                     <div>{displayDate}</div>
                     {displayTime && <div className="text-xs text-slate-400">{displayTime}</div>}
                   </div>
                 </div>
 
-                <div className="min-w-[96px] text-right">
+                <div className="rounded-lg border border-slate-800/80 bg-slate-950/35 px-3 py-2 text-left md:text-right lg:min-w-[96px] lg:border-0 lg:bg-transparent lg:px-0 lg:py-0">
                   <div className="text-sm text-slate-400">
                     Stand Move
                   </div>
