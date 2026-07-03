@@ -22,6 +22,7 @@ export default function RecordsPage({
   stats,
   history,
   fleet,
+  onImportCsv,
 }) {
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
@@ -117,6 +118,7 @@ export default function RecordsPage({
       <ExportOptions 
         data={displayHistory}
         title="Movement Records"
+        onImportCsv={onImportCsv}
         onExportComplete={(type) => {
           console.log(`Export completed: ${type}`);
         }}

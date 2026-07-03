@@ -28,15 +28,9 @@ export default function HomePage({
 
     const totalSeconds = Math.max(0, Math.floor((now - lastEntryTimestamp) / 1000));
     const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
 
     return {
       days,
-      hours,
-      minutes,
-      seconds,
       lastEntryLabel: new Date(lastEntryTimestamp).toLocaleString(),
     };
   }, [lastEntryTimestamp, now]);
@@ -49,7 +43,7 @@ export default function HomePage({
           {elapsed ? (
             <>
               <div className="mt-2 text-2xl sm:text-3xl font-bold text-cyan-100">
-                {elapsed.days}d {elapsed.hours.toString().padStart(2, "0")}h {elapsed.minutes.toString().padStart(2, "0")}m {elapsed.seconds.toString().padStart(2, "0")}s
+                {elapsed.days} day{elapsed.days === 1 ? "" : "s"}
               </div>
               <div className="mt-1 text-sm text-slate-300">Last entry: {elapsed.lastEntryLabel}</div>
             </>

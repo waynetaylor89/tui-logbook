@@ -250,6 +250,49 @@ export default function AircraftMovementLogbook() {
     addToast("Movement added successfully.", "success");
   };
 
+  const handleImportCsvRows = (rows) => {
+    if (!Array.isArray(rows) || rows.length === 0) {
+      addToast("No CSV rows found to import.", "warning");
+      return;
+    }
+
+    const normalize = (value) => String(value || "").trim();
+    const acceptedRows = rows
+      .map((row) => ({
+        aircraft: normalize(row.Aircraft ?? row.aircraft),
+        movementType: normalize(row["Movement Type"] ?? row.movementType) || "Tow",
+        fromStand: normalize(row["From Stand"] ?? row.fromStand).toUpperCase(),
+        toStand: normalize(row["To Stand"] ?? row.toStand).toUpperCase(),
+        date: normalize(row.Date ?? row.date),
+        time: normalize(row.Time ?? row.time),
+        notes: normalize(row.Notes ?? row.notes),
+      }))
+      .filter((entry) => entry.aircraft);
+
+    if (acceptedRows.length === 0) {
+      addToast("No valid movement rows found in CSV.", "warning");
+      return;
+    }
+
+    const baseMs = Date.now();
+    [...acceptedRows].reverse().forEach((entry, index) => {
+      addLogEntryToHistory({
+        id: `${baseMs + index}-${Math.random().toString(36).slice(2, 8)}`,
+        createdBy: currentUser,
+        airport: AIRPORT,
+        movementType: entry.movementType,
+        aircraft: entry.aircraft,
+        fromStand: entry.fromStand,
+        toStand: entry.toStand,
+        date: entry.date,
+        time: entry.time,
+        notes: entry.notes,
+      });
+    });
+
+    addToast(`Imported ${acceptedRows.length} movement records from CSV.`, "success");
+  };
+
   const exportLogbook = () => {
     const exportData = isAdmin(currentUser) ? allHistory : filters.filteredHistory;
     exportLogbookCSV(exportData);
@@ -344,6 +387,7 @@ export default function AircraftMovementLogbook() {
               setCurrentPage={filters.setCurrentPage}
               typeFilteredHistory={filters.typeFilteredHistory}
               exportLogbook={exportLogbook}
+              onImportCsv={handleImportCsvRows}
               selectedUser={filters.selectedUser}
               setSelectedUser={filters.setSelectedUser}
               userOptions={filters.userOptions}

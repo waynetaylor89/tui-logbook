@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { exportToPDF } from "../utils/exportPDF.js";
 import { exportToExcel, exportToExcelMultiple } from "../utils/exportExcel.js";
@@ -7,10 +7,87 @@ import { toast } from "./Toast.jsx";
 const ExportOptions = ({ 
   data, 
   title = "Movement Records",
-  onExportComplete 
+  onExportComplete,
+  onImportCsv,
 }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [exportType, setExportType] = useState("");
+  const fileInputRef = useRef(null);
+
+  const handleImportCsvClick = () => {
+    if (!onImportCsv) {
+      toast.warning("CSV import is not available here.");
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
+  const handleImportCsvFile = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const rows = await parseCsvFromFile(file);
+      if (!Array.isArray(rows) || rows.length === 0) {
+        toast.warning("No rows found in CSV file.");
+        return;
+      }
+
+      onImportCsv(rows);
+      if (onExportComplete) onExportComplete("import-csv");
+    } catch (error) {
+      toast.error(`CSV import failed: ${error.message}`);
+    } finally {
+      event.target.value = "";
+    }
+  };
+
+  const parseCsvFromFile = async (file) => {
+    const text = await file.text();
+    const lines = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (lines.length < 2) return [];
+
+    const headers = parseCsvLine(lines[0]);
+    return lines.slice(1).map((line) => {
+      const values = parseCsvLine(line);
+      return headers.reduce((acc, header, idx) => {
+        acc[header] = values[idx] ?? "";
+        return acc;
+      }, {});
+    });
+  };
+
+  const parseCsvLine = (line) => {
+    const values = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i += 1) {
+      const char = line[i];
+
+      if (char === '"') {
+        const nextChar = line[i + 1];
+        if (inQuotes && nextChar === '"') {
+          current += '"';
+          i += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === "," && !inQuotes) {
+        values.push(current.trim());
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+
+    values.push(current.trim());
+    return values;
+  };
 
   const handleExport = async (type) => {
     if (data.length === 0) {
@@ -307,6 +384,23 @@ const ExportOptions = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="hidden"
+          onChange={handleImportCsvFile}
+        />
+
+        {/* CSV Import */}
+        <button
+          onClick={handleImportCsvClick}
+          disabled={isExporting}
+          className="flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-3 text-white transition-colors hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-slate-700"
+        >
+          ⬆️ Import CSV
+        </button>
+
         {/* PDF Export */}
         <button
           onClick={() => handleExport('pdf')}
@@ -390,6 +484,7 @@ ExportOptions.propTypes = {
   data: PropTypes.array.isRequired,
   title: PropTypes.string,
   onExportComplete: PropTypes.func,
+  onImportCsv: PropTypes.func,
 };
 
 export default ExportOptions;
