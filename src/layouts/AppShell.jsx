@@ -11,6 +11,14 @@ const navClass = ({ isActive }) => {
   return `${baseClasses} text-cyan-100 border-cyan-900/70 bg-slate-950/75 hover:bg-slate-900/90`;
 };
 
+const mobileNavClass = ({ isActive }) => {
+  const baseClasses = "min-h-[52px] rounded-xl border px-4 py-3 text-center text-sm font-semibold leading-tight transition-all duration-200 flex items-center justify-center";
+  if (isActive) {
+    return `${baseClasses} text-cyan-50 shadow-md border-cyan-300/60 bg-gradient-to-r from-cyan-700/90 to-blue-700/90`;
+  }
+  return `${baseClasses} text-cyan-100 border-cyan-900/70 bg-slate-950/80 hover:bg-slate-900/95`;
+};
+
 export default function AppShell({ fleetCount, currentUser, isAdmin, onLogout, darkMode }) {
   const shellTheme = "from-slate-950 via-slate-900 to-cyan-950";
 
@@ -24,22 +32,22 @@ export default function AppShell({ fleetCount, currentUser, isAdmin, onLogout, d
               <h1 className="text-lg font-bold" style={{ color: AVIATION_COLORS.accent }}>TUI Logbook</h1>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              <NavLink to="/" end className={navClass}>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <NavLink to="/" end className={mobileNavClass}>
                 Home
               </NavLink>
-              <NavLink to="/movements" className={navClass}>
+              <NavLink to="/movements" className={mobileNavClass}>
                 Aircraft Movements
               </NavLink>
-              <NavLink to="/records" className={navClass}>
+              <NavLink to="/records" className={mobileNavClass}>
                 Movement Records
               </NavLink>
               {isAdmin && (
-                <NavLink to="/users" className={navClass}>
+                <NavLink to="/users" className={mobileNavClass}>
                   Manage Users
                 </NavLink>
               )}
-              <NavLink to="/settings" className={navClass}>
+              <NavLink to="/settings" className={mobileNavClass}>
                 Settings
               </NavLink>
             </div>

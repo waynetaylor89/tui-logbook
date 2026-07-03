@@ -1,6 +1,8 @@
 import { useState } from "react";
 
 const APP_VERSION = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "0.0.0";
+const APP_BUILD = typeof __APP_BUILD__ !== "undefined" ? __APP_BUILD__ : "0";
+const APP_REVISION = typeof __APP_REVISION__ !== "undefined" ? __APP_REVISION__ : "local";
 
 const UserSettings = ({ 
   notificationPreferences,
@@ -214,8 +216,9 @@ const UserSettings = ({
           </div>
         </div>
 
-        <div className="mb-2 text-right text-xs text-slate-500">
-          App Version {APP_VERSION}
+        <div className="mb-2 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-right text-xs text-slate-400">
+          <div>App Version {APP_VERSION}</div>
+          <div className="mt-1">Build {APP_BUILD} ({APP_REVISION})</div>
         </div>
 
         {message && (

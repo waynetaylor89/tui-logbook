@@ -14,7 +14,7 @@ const getGitValue = (command, fallback) => {
   }
 }
 
-const gitBuildNumber = getGitValue('git rev-list --count HEAD', '0')
+const gitBuildNumber = getGitValue('git log -1 --format=%cd --date=format:%Y%m%d%H%M HEAD', '000000000000')
 const gitRevision = getGitValue('git rev-parse --short HEAD', 'local')
 const appBuild = process.env.APP_BUILD || gitBuildNumber
 const appRevision = process.env.APP_REVISION || gitRevision
