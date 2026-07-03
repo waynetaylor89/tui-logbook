@@ -36,7 +36,11 @@ export default function HomePage({
   }, [lastEntryTimestamp, now]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 relative">
+      <div
+        aria-label="update-test-overlay"
+        className="fixed right-4 top-4 z-[1000] h-16 w-16 rounded-sm border-2 border-red-200 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.7)]"
+      />
       <section className="rounded-2xl border border-cyan-900/60 bg-slate-900/80 p-4 sm:p-5 shadow-lg space-y-4">
         <div className="rounded-xl border border-cyan-800/60 bg-slate-950/70 px-4 py-3">
           <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/70">Countdown Since Last Entry Into System</div>
