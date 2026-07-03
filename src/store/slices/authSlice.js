@@ -1,158 +1,75 @@
-const DEFAULT_NOTIFICATION_PREFERENCES = {
-  enabled: true,
-  periodDays: 7,
-  reminders: {
-    shiftStart: true,
-    break: true,
-    endShift: true,
-    incompleteJob: true,
-    unfinishedNotes: true,
-    exportReminder: true,
-    dailySummary: true,
-    weeklySummary: true,
-    shiftStartTime: "06:00",
-    breakAfterMinutes: 180,
-    endShiftTime: "18:00",
-    incompleteJobMinutes: 45,
-    exportReminderTime: "19:00",
-    dailySummaryTime: "20:30",
-    weeklySummaryDay: 1,
-    weeklySummaryTime: "20:30",
-  },
-};
+import { ADMIN_USERNAME } from "../../constants/appConstants.js";
 
-function mergeNotificationPreferences(base, incoming) {
-  const source = incoming && typeof incoming === "object" ? incoming : {};
-  return {
-    ...base,
-    ...source,
-    reminders: {
-      ...base.reminders,
-      ...(source.reminders && typeof source.reminders === "object" ? source.reminders : {}),
-    },
-  };
-}
-
-// Single-user profile for Wayne
 export const createAuthSlice = (set, get) => ({
+  users: {},
   currentUser: "Wayne",
   hasHydrated: false,
 
+  setUsers: (users) => set({ users }),
+  setCurrentUser: (user) => set({ currentUser: user }),
   setHasHydrated: (value) => set({ hasHydrated: value }),
 
-  // Profile management for single user
-  profile: {
-    notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
-    notificationMeta: {
-      lastExportAt: "",
-    },
-    selectedAirline: "TUI Airways",
-    showOtherAirlines: false,
-    liveFlightBoardFilter: "TUI",
-    darkMode: true,
+  listUsernames: () => Object.keys(get().users).filter(Boolean),
+
+  deleteUser: (username) => {
+    if (!username || username === ADMIN_USERNAME) return;
+    const users = get().users;
+    const history = get().history;
+    const updatedUsers = { ...users };
+    delete updatedUsers[username];
+    const updatedHistory = { ...history };
+    delete updatedHistory[username];
+    set({ users: updatedUsers, history: updatedHistory });
   },
 
-  updateNotificationPreferences: (preferences) => {
-    const profile = get().profile;
-    const nextPreferences = mergeNotificationPreferences(
-      DEFAULT_NOTIFICATION_PREFERENCES,
-      profile.notificationPreferences
-    );
+  resetUserPassword: async () => false,
 
+  updateNotificationPreferences: (username, preferences) => {
+    const users = get().users;
+    if (!users[username]) return false;
     set({
-      profile: {
-        ...profile,
-        notificationPreferences: mergeNotificationPreferences(nextPreferences, preferences),
-      },
-    });
-    return true;
-  },
-
-  getNotificationPreferences: () => {
-    return mergeNotificationPreferences(
-      DEFAULT_NOTIFICATION_PREFERENCES,
-      get().profile.notificationPreferences
-    );
-  },
-
-  markExportAction: () => {
-    const profile = get().profile;
-    set({
-      profile: {
-        ...profile,
-        notificationMeta: {
-          ...(profile.notificationMeta || {}),
-          lastExportAt: new Date().toISOString(),
+      users: {
+        ...users,
+        [username]: {
+          ...users[username],
+          notificationPreferences: {
+            ...users[username].notificationPreferences,
+            ...preferences,
+          },
         },
       },
     });
     return true;
   },
 
-  getNotificationMeta: () => {
-    return get().profile.notificationMeta || { lastExportAt: "" };
+  getNotificationPreferences: (username) => {
+    const users = get().users;
+    if (!users[username]) return { enabled: true, periodDays: 7 };
+    return users[username].notificationPreferences || { enabled: true, periodDays: 7 };
   },
 
-  setSelectedAirline: (airline) => {
-    const profile = get().profile;
+  toggleDarkMode: (username) => {
+    const users = get().users;
+    if (!users[username]) return false;
     set({
-      profile: {
-        ...profile,
-        selectedAirline: String(airline || "TUI Airways"),
+      users: {
+        ...users,
+        [username]: {
+          ...users[username],
+          darkMode: !users[username].darkMode,
+        },
       },
     });
     return true;
   },
 
-  getSelectedAirline: () => {
-    return get().profile?.selectedAirline || "TUI Airways";
+  getDarkMode: (username) => {
+    const users = get().users;
+    if (!users[username]) return false;
+    return users[username].darkMode || false;
   },
 
-  setShowOtherAirlines: (value) => {
-    const profile = get().profile;
-    set({
-      profile: {
-        ...profile,
-        showOtherAirlines: Boolean(value),
-      },
-    });
-    return true;
-  },
-
-  getShowOtherAirlines: () => {
-    return Boolean(get().profile?.showOtherAirlines);
-  },
-
-  setLiveFlightBoardFilter: (value) => {
-    const profile = get().profile;
-    const allowed = ["All", "TUI", "Arrivals", "Departures", "Active", "Delayed", "Completed"];
-    const next = allowed.includes(String(value)) ? String(value) : "TUI";
-    set({
-      profile: {
-        ...profile,
-        liveFlightBoardFilter: next,
-      },
-    });
-    return true;
-  },
-
-  getLiveFlightBoardFilter: () => {
-    const value = String(get().profile?.liveFlightBoardFilter || "TUI");
-    return value || "TUI";
-  },
-
-  toggleDarkMode: () => {
-    const profile = get().profile;
-    set({
-      profile: {
-        ...profile,
-        darkMode: !profile.darkMode,
-      },
-    });
-    return true;
-  },
-
-  getDarkMode: () => {
-    return get().profile.darkMode || false;
+  isAdmin: (username) => {
+    return username === ADMIN_USERNAME;
   },
 });

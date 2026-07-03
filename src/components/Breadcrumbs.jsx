@@ -1,4 +1,5 @@
 import { useLocation, Link } from "react-router-dom";
+import PropTypes from "prop-types";
 import { memo } from "react";
 
 const Breadcrumbs = memo(function Breadcrumbs() {
@@ -8,15 +9,9 @@ const Breadcrumbs = memo(function Breadcrumbs() {
     const pathnames = location.pathname.split('/').filter(x => x);
     
     const breadcrumbMap = {
-      '': 'Statistics',
-      'statistics': 'Statistics',
-      'flights': 'Flight Board',
-      'my-shift': 'My Shift',
-      'fleet': 'Fleet',
-      'timeline': 'Operations Timeline',
-      'history': 'History',
-      'calendar': 'Shift Calendar',
-      'import': 'FlightRadar24 Import',
+      '': 'Home',
+      'movements': 'Aircraft Movements',
+      'records': 'Movement Records',
       'users': 'Manage Users'
     };
 
@@ -29,11 +24,11 @@ const Breadcrumbs = memo(function Breadcrumbs() {
         <span key={routeTo} className="flex items-center">
           {index > 0 && <span className="mx-2 text-slate-400">/</span>}
           {isLast ? (
-            <span className="font-medium text-slate-200">{displayName}</span>
+            <span className="text-slate-900 dark:text-slate-100 font-medium">{displayName}</span>
           ) : (
             <Link 
               to={routeTo} 
-              className="text-sky-300 transition-colors hover:text-sky-200"
+              className="text-blue-600 hover:text-blue-800 dark:text-sky-400 dark:hover:text-sky-300 transition-colors"
             >
               {displayName}
             </Link>
@@ -44,9 +39,9 @@ const Breadcrumbs = memo(function Breadcrumbs() {
   };
 
   return (
-    <nav className="ops-panel flex items-center space-x-1 rounded-xl px-4 py-2 text-sm text-slate-300">
-      <Link to="/statistics" className="text-sky-300 transition-colors hover:text-sky-200">
-        Statistics
+    <nav className="flex items-center space-x-1 text-sm py-2 px-4 bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl">
+      <Link to="/" className="text-blue-600 hover:text-blue-800 dark:text-sky-400 dark:hover:text-sky-300 transition-colors">
+        🏠
       </Link>
       {getBreadcrumbs()}
     </nav>

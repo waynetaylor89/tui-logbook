@@ -1,33 +1,37 @@
 import PropTypes from "prop-types";
 import { memo } from "react";
+import { AVIATION_COLORS } from "../config/logbookConfig.js";
 
-const Header = memo(function Header({ fleetCount, currentUser, darkMode }) {
-  const dayLabel = new Date().toLocaleDateString(undefined, {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-  });
-
+const Header = memo(function Header({ fleetCount, currentUser, isAdmin, onLogout, darkMode }) {
   return (
-    <div className={`ops-panel rounded-2xl p-4 sm:p-5 ${darkMode ? "" : "bg-slate-50"}`}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">TUI Ground Control</p>
-          <h1 className="mt-1 text-xl font-semibold text-slate-100 sm:text-2xl">Airport Operations Interface</h1>
-          <div className="mt-1 text-sm text-slate-400">
-            {fleetCount} aircraft available in your active roster
-          </div>
-        </div>
+    <div className={`rounded-2xl shadow-lg p-4 sm:p-5 border ${darkMode ? 'bg-slate-800/95 border-slate-700' : 'bg-white/95 border-slate-100'} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`}>
+      <div className="min-w-0">
+        <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400 mb-1">Airport Operations Interface</div>
+        <h1 className="text-2xl font-bold truncate" style={{ color: AVIATION_COLORS.primary }}>
+          TUI Aircraft Logbook
+        </h1>
 
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
-          <div className="ops-pill rounded-xl px-3 py-2 text-xs text-slate-200 sm:text-sm">
-            Agent: {currentUser}
-          </div>
-          <div className="ops-pill rounded-xl px-3 py-2 text-xs text-slate-200 sm:text-sm">{dayLabel}</div>
-          <div className="ops-pill rounded-xl px-3 py-2 text-xs text-slate-200 sm:text-sm">
-            {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </div>
+        <div className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+          {fleetCount} aircraft loaded
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:justify-end">
+        <div className={`text-sm font-medium rounded-full px-3 py-1 border ${darkMode ? 'text-slate-200 border-slate-600 bg-slate-700/60' : 'text-slate-700 border-slate-200 bg-slate-50'}`}>
+          Operator: {currentUser} {isAdmin && "(Admin)"}
+        </div>
+        <div className={`text-sm font-medium rounded-full px-3 py-1 border ${darkMode ? 'text-slate-200 border-slate-600 bg-slate-700/60' : 'text-slate-700 border-slate-200 bg-slate-50'}`}>
+          {new Date().toLocaleTimeString()}
+        </div>
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className="text-white px-3 py-1 rounded hover:opacity-90 text-sm"
+            style={{ backgroundColor: AVIATION_COLORS.danger }}
+          >
+            Logout
+          </button>
+        )}
       </div>
     </div>
   );
@@ -36,6 +40,8 @@ const Header = memo(function Header({ fleetCount, currentUser, darkMode }) {
 Header.propTypes = {
   fleetCount: PropTypes.number.isRequired,
   currentUser: PropTypes.string.isRequired,
+  isAdmin: PropTypes.bool.isRequired,
+  onLogout: PropTypes.func,
   darkMode: PropTypes.bool,
 };
 
