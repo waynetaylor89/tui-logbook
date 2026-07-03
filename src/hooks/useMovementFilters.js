@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { getEntryCreatedAtTimestamp } from "../utils/movementTimestamps.js";
 
 export const useMovementFilters = (currentUserHistory) => {
   const [activeTab, setActiveTab] = useState("ALL");
@@ -30,7 +31,11 @@ export const useMovementFilters = (currentUserHistory) => {
       });
     }
     
-    return filtered;
+    return [...filtered].sort((left, right) => {
+      const leftTimestamp = getEntryCreatedAtTimestamp(left) || 0;
+      const rightTimestamp = getEntryCreatedAtTimestamp(right) || 0;
+      return rightTimestamp - leftTimestamp;
+    });
   }, [activeTab, filteredHistory]);
 
   const totalPages = Math.max(1, Math.ceil(typeFilteredHistory.length / recordsPerPage));

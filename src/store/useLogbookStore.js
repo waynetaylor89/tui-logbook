@@ -10,8 +10,9 @@ import { createTimelineSlice } from "./slices/timelineSlice.js";
 import { mergeImportedHistory } from "./importedHistory.js";
 import { createAutomaticBackup, getBackupMeta } from "../services/backupService.js";
 import { deepMerge, safeMigrateState } from "../services/migrationService.js";
+import { normalizeMovementHistory } from "../utils/movementTimestamps.js";
 
-const STORE_VERSION = 10;
+const STORE_VERSION = 11;
 
 const cloneStateOnly = (state = {}) => {
   const cloned = {};
@@ -167,11 +168,25 @@ const useLogbookStore = create(
           };
         }
 
+        if (currentVersion < 11) {
+          return {
+            ...state,
+            history: normalizeMovementHistory(state.history || {}),
+          };
+        }
+
         return state;
       }),
-      merge: (persistedState, currentState) => deepMerge(currentState, persistedState),
+      merge: (persistedState, currentState) => {
+        const merged = deepMerge(currentState, persistedState);
+        return {
+          ...merged,
+          history: normalizeMovementHistory(merged.history || {}),
+        };
+      },
       onRehydrateStorage: () => (state) => {
         if (state) {
+          state.setHistory(state.history || {}, { allowReset: true });
           state.setHasHydrated(true);
           state.refreshBackupMeta();
         }

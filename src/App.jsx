@@ -19,55 +19,13 @@ import { findRecoverableState } from "./services/backupRecoveryService.js";
 import { analyzeImportFile } from "./services/importWizardService.js";
 import { importMovementsFromCsvRows, restoreFromJsonBackup } from "./services/restoreService.js";
 import { exportMovementsToCsv, getCsvFilename, downloadCsv } from "./services/csvService.js";
+import { getEntryCreatedAtDateKey, getEntryCreatedAtTimestamp, normalizeMovementEntry } from "./utils/movementTimestamps.js";
 
 // Code split pages for better performance
 const HomePage = lazy(() => import("./pages/HomePage.jsx"));
 const MovementsPage = lazy(() => import("./pages/MovementsPage.jsx"));
 const RecordsPage = lazy(() => import("./pages/RecordsPage.jsx"));
 const UsersPage = lazy(() => import("./pages/UsersPage.jsx"));
-
-const padDatePart = (value) => String(value).padStart(2, "0");
-
-const parseMovementDateValue = (dateValue, timeValue = "") => {
-  const rawDate = String(dateValue || "").trim();
-  const rawTime = String(timeValue || "").trim();
-  if (!rawDate) return null;
-
-  let year;
-  let month;
-  let day;
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
-    [year, month, day] = rawDate.split("-").map(Number);
-  } else {
-    const dottedMatch = rawDate.match(/^(\d{1,2})\.(\d{1,2})(?:\.(\d{2}|\d{4}))?$/);
-    if (!dottedMatch) return null;
-
-    day = Number(dottedMatch[1]);
-    month = Number(dottedMatch[2]);
-    const currentYear = new Date().getFullYear();
-    if (!dottedMatch[3]) {
-      year = currentYear;
-    } else if (dottedMatch[3].length === 2) {
-      year = 2000 + Number(dottedMatch[3]);
-    } else {
-      year = Number(dottedMatch[3]);
-    }
-  }
-
-  const timeMatch = rawTime.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-  const hours = timeMatch ? Number(timeMatch[1]) : 0;
-  const minutes = timeMatch ? Number(timeMatch[2]) : 0;
-  const seconds = timeMatch ? Number(timeMatch[3] || 0) : 0;
-
-  const parsed = new Date(year, month - 1, day, hours, minutes, seconds);
-  if (Number.isNaN(parsed.getTime())) return null;
-
-  return {
-    timestamp: parsed.getTime(),
-    isoDate: `${year}-${padDatePart(month)}-${padDatePart(day)}`,
-  };
-};
 
 export default function AircraftMovementLogbook() {
   // Zustand store
@@ -191,8 +149,7 @@ export default function AircraftMovementLogbook() {
     let monthlyMovements = 0;
 
     data.forEach((entry) => {
-      const parsedMovementDate = parseMovementDateValue(entry.date, entry.time);
-      const normalizedDate = parsedMovementDate?.isoDate || "";
+      const normalizedDate = getEntryCreatedAtDateKey(entry);
       aircraftCounts[entry.aircraft] = (aircraftCounts[entry.aircraft] || 0) + 1;
       standCounts[entry.fromStand] = (standCounts[entry.fromStand] || 0) + 1;
       standCounts[entry.toStand] = (standCounts[entry.toStand] || 0) + 1;
@@ -216,12 +173,12 @@ export default function AircraftMovementLogbook() {
     });
 
     // Calculate logging streak
-    const uniqueDates = [...new Set(data.map((entry) => parseMovementDateValue(entry.date, entry.time)?.isoDate).filter(Boolean))].sort().reverse();
+    const uniqueDates = [...new Set(data.map((entry) => getEntryCreatedAtDateKey(entry)).filter(Boolean))].sort().reverse();
     let currentStreak = 0;
     let checkDate = new Date();
     
     for (const dateStr of uniqueDates) {
-      const entryDate = parseMovementDateValue(dateStr)?.timestamp ? new Date(parseMovementDateValue(dateStr).timestamp) : new Date(dateStr);
+      const entryDate = new Date(`${dateStr}T00:00:00`);
       const diffDays = Math.floor((checkDate - entryDate) / (1000 * 60 * 60 * 24));
       
       if (diffDays === 0 || diffDays === 1) {
@@ -250,9 +207,9 @@ export default function AircraftMovementLogbook() {
     let latest = null;
 
     data.forEach((entry) => {
-      const movementTimestamp = parseMovementDateValue(entry.date, entry.time)?.timestamp;
-      if (Number.isFinite(movementTimestamp) && movementTimestamp > 0) {
-        latest = latest ? Math.max(latest, movementTimestamp) : movementTimestamp;
+      const createdTimestamp = getEntryCreatedAtTimestamp(entry);
+      if (Number.isFinite(createdTimestamp) && createdTimestamp > 0) {
+        latest = latest ? Math.max(latest, createdTimestamp) : createdTimestamp;
         return;
       }
 
@@ -262,7 +219,7 @@ export default function AircraftMovementLogbook() {
         return;
       }
 
-      const fallback = new Date(`${entry.date || ""} ${entry.time || "00:00:00"}`).getTime();
+      const fallback = new Date(`${entry.createdAt || ""}`).getTime();
       if (Number.isFinite(fallback)) {
         latest = latest ? Math.max(latest, fallback) : fallback;
       }
@@ -318,8 +275,10 @@ export default function AircraftMovementLogbook() {
       fromStand: movementForm.fromStand,
       toStand: movementForm.toStand,
       notes: movementForm.notes,
-      date: movementForm.movementDate,
-      time: new Date().toLocaleTimeString(),
+      movementDate: movementForm.movementDate,
+      movementTime: new Date().toLocaleTimeString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     addLogEntryToHistory(entry);
@@ -335,14 +294,17 @@ export default function AircraftMovementLogbook() {
 
     const normalize = (value) => String(value || "").trim();
     const acceptedRows = rows
-      .map((row) => ({
+      .map((row) => normalizeMovementEntry({
         aircraft: normalize(row.Aircraft ?? row.aircraft),
         movementType: normalize(row["Movement Type"] ?? row.movementType) || "Tow",
         fromStand: normalize(row["From Stand"] ?? row.fromStand).toUpperCase(),
         toStand: normalize(row["To Stand"] ?? row.toStand).toUpperCase(),
-        date: normalize(row.Date ?? row.date),
-        time: normalize(row.Time ?? row.time),
+        movementDate: normalize(row.movementDate ?? row.Date ?? row.date),
+        movementTime: normalize(row.movementTime ?? row.Time ?? row.time),
+        createdAt: normalize(row.createdAt ?? row["Created Date"] ?? row.createdAt),
+        updatedAt: normalize(row.updatedAt ?? row["Modified Date"] ?? row.updatedAt),
         notes: normalize(row.Notes ?? row.notes),
+        createdBy: currentUser,
       }))
       .filter((entry) => entry.aircraft);
 
@@ -361,8 +323,11 @@ export default function AircraftMovementLogbook() {
         aircraft: entry.aircraft,
         fromStand: entry.fromStand,
         toStand: entry.toStand,
-        date: entry.date,
-        time: entry.time,
+        movementDate: entry.movementDate,
+        movementTime: entry.movementTime,
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+        missingTimestamp: entry.missingTimestamp,
         notes: entry.notes,
       });
     });

@@ -1,6 +1,7 @@
 import { csvRowToMovement, movementDuplicateKey, parseMovementsCsv } from "./csvService.js";
 import { validateBackupPayload } from "./jsonBackupService.js";
 import { deepMerge } from "./migrationService.js";
+import { normalizeMovementEntry } from "../utils/movementTimestamps.js";
 
 const flattenHistory = (history = {}) => Object.values(history || {}).flat();
 
@@ -45,7 +46,7 @@ export const importMovementsFromCsvRows = ({ rows, currentHistory = {}, currentU
       existingKeys.add(key);
       const owner = movement.createdBy || currentUser || "wayne";
       const ownerHistory = next[owner] || [];
-      next[owner] = [movement, ...ownerHistory];
+      next[owner] = [normalizeMovementEntry(movement), ...ownerHistory];
       imported.push(movement);
     } catch (_error) {
       failed += 1;

@@ -1,3 +1,5 @@
+import { getEntryMovementDate, getEntryMovementTime, normalizeMovementEntry } from "../utils/movementTimestamps.js";
+
 const CSV_COLUMNS = [
   "UUID",
   "Flight Number",
@@ -8,6 +10,10 @@ const CSV_COLUMNS = [
   "Movement Type",
   "From Stand",
   "To Stand",
+  "movementDate",
+  "movementTime",
+  "createdAt",
+  "updatedAt",
   "Date",
   "Time",
   "Created Date",
@@ -78,8 +84,8 @@ const parseAircraftType = (entry = {}) => {
 export const movementDuplicateKey = (entry = {}) => {
   const registration = parseRegistration(entry).toUpperCase();
   const movementType = String(entry.movementType || "").trim().toUpperCase();
-  const date = String(entry.date || "").trim();
-  const time = String(entry.time || "").trim();
+  const date = getEntryMovementDate(entry);
+  const time = getEntryMovementTime(entry);
   const fromStand = String(entry.fromStand || "").trim().toUpperCase();
   const toStand = String(entry.toStand || "").trim().toUpperCase();
   return [registration, movementType, date, time, fromStand, toStand].join("|");
@@ -95,8 +101,12 @@ export const movementToCsvRecord = (entry = {}) => ({
   "Movement Type": entry.movementType || "",
   "From Stand": entry.fromStand || "",
   "To Stand": entry.toStand || "",
-  "Date": entry.date || "",
-  "Time": entry.time || "",
+  "movementDate": getEntryMovementDate(entry),
+  "movementTime": getEntryMovementTime(entry),
+  "createdAt": entry.createdAt || "",
+  "updatedAt": entry.updatedAt || "",
+  "Date": getEntryMovementDate(entry),
+  "Time": getEntryMovementTime(entry),
   "Created Date": entry.createdAt || "",
   "Modified Date": entry.updatedAt || "",
   "Operator": entry.createdBy || "",
@@ -158,10 +168,10 @@ export const csvRowToMovement = (row = {}, currentUser = "") => {
   const movementType = String(row["Movement Type"] || row["movementType"] || "Tow").trim();
   const fromStand = String(row["From Stand"] || row["fromStand"] || "").trim().toUpperCase();
   const toStand = String(row["To Stand"] || row["toStand"] || "").trim().toUpperCase();
-  const date = String(row["Date"] || row["date"] || "").trim();
-  const time = String(row["Time"] || row["time"] || "").trim();
+  const movementDate = String(row["movementDate"] || row["Movement Date"] || row["Date"] || row["date"] || "").trim();
+  const movementTime = String(row["movementTime"] || row["Movement Time"] || row["Time"] || row["time"] || "").trim();
 
-  return {
+  return normalizeMovementEntry({
     id: String(row["UUID"] || row.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`),
     flightNumber: String(row["Flight Number"] || row.flightNumber || "").trim(),
     registration: String(row["Registration"] || row.registration || "").trim(),
@@ -171,10 +181,10 @@ export const csvRowToMovement = (row = {}, currentUser = "") => {
     movementType,
     fromStand,
     toStand,
-    date,
-    time,
-    createdAt: String(row["Created Date"] || row.createdAt || "").trim(),
-    updatedAt: String(row["Modified Date"] || row.updatedAt || "").trim(),
+    movementDate,
+    movementTime,
+    createdAt: String(row["createdAt"] || row["Created Date"] || row.createdAt || "").trim(),
+    updatedAt: String(row["updatedAt"] || row["Modified Date"] || row.updatedAt || "").trim(),
     createdBy: String(row["Operator"] || row.createdBy || currentUser || "").trim(),
     teamLeader: String(row["Team Leader"] || row.teamLeader || "").trim(),
     shift: String(row["Shift"] || row.shift || "").trim(),
@@ -184,7 +194,7 @@ export const csvRowToMovement = (row = {}, currentUser = "") => {
     defectDetails: String(row["Defect Details"] || row.defectDetails || "").trim(),
     holdNetChecked: String(row["Hold Net Checked"] || row.holdNetChecked || "").toLowerCase() === "true",
     photosCount: Number(row["Photos Count"] || row.photosCount || 0),
-  };
+  });
 };
 
 export const getCsvFilename = (date = new Date()) => {

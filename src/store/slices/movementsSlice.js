@@ -1,7 +1,9 @@
+import { normalizeMovementEntry, normalizeMovementHistory } from "../../utils/movementTimestamps.js";
+
 export const createMovementsSlice = (set, get) => ({
   history: {},
   setHistory: (history, options = {}) => {
-    const next = history && typeof history === "object" ? history : {};
+    const next = normalizeMovementHistory(history, { defaultCreatedAt: options.defaultCreatedAt });
     const isEmpty = Object.keys(next).length === 0;
     if (isEmpty && !options.allowReset) {
       return false;
@@ -14,8 +16,11 @@ export const createMovementsSlice = (set, get) => ({
     const history = get().history;
     const currentUser = get().currentUser;
     const userHistory = history[currentUser] || [];
+    const normalizedEntry = normalizeMovementEntry(entry, {
+      defaultCreatedAt: new Date().toISOString(),
+    });
     set({
-      history: { ...history, [currentUser]: [entry, ...userHistory] },
+      history: { ...history, [currentUser]: [normalizedEntry, ...userHistory] },
     });
     get().createAutomaticBackup?.("add-movement");
   },
@@ -36,17 +41,21 @@ export const createMovementsSlice = (set, get) => ({
     const targetUser = owner || get().currentUser;
     const userHistory = history[targetUser] || [];
     const editor = get().currentUser;
+    const updateStamp = new Date().toISOString();
     set({
       history: {
         ...history,
         [targetUser]: userHistory.map((entry) =>
           entry.id === id
-            ? {
-                ...entry,
-                ...updates,
-                updatedAt: new Date().toISOString(),
-                updatedBy: editor,
-              }
+            ? normalizeMovementEntry(
+                {
+                  ...entry,
+                  ...updates,
+                  updatedAt: updateStamp,
+                  updatedBy: editor,
+                },
+                { defaultCreatedAt: entry.createdAt || updateStamp }
+              )
             : entry
         ),
       },

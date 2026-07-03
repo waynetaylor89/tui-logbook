@@ -152,7 +152,8 @@ export default function RecordsPanel({
         )}
 
         {paginatedHistory.map((item) => {
-          const displayDate = item.date || DEFAULT_DATE_TEXT;
+          const displayDate = item.movementDate || item.date || DEFAULT_DATE_TEXT;
+          const displayTime = item.movementTime || item.time || "";
           const editedLabel =
             item.updatedAt && item.updatedBy
               ? `Edited by ${item.updatedBy} on ${new Date(item.updatedAt).toLocaleString()}`
@@ -179,7 +180,7 @@ export default function RecordsPanel({
                 <div className="flex min-h-[52px] items-center justify-center pt-1 text-center text-sm text-slate-300">
                   <div className="rounded-lg border border-slate-700/80 bg-slate-950/60 px-4 py-2 leading-tight">
                     <div>{displayDate}</div>
-                    {item.time && <div className="text-xs text-slate-400">{item.time}</div>}
+                    {displayTime && <div className="text-xs text-slate-400">{displayTime}</div>}
                   </div>
                 </div>
 
