@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import UserSettings from "./components/UserSettings.jsx";
 import AppShell from "./layouts/AppShell.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import UpdateAvailableBanner from "./components/UpdateAvailableBanner.jsx";
 import { useToast, ToastContainer } from "./components/Toast.jsx";
 import { LoadingOverlay } from "./components/Spinner.jsx";
 import { exportLogbookCSV } from "./utils/exportCSV.js";
@@ -449,6 +450,9 @@ export default function AircraftMovementLogbook() {
 
   return (
     <ErrorBoundary>
+      <div className="mx-auto w-full max-w-7xl px-3 pt-3 lg:px-6 lg:pt-6">
+        <UpdateAvailableBanner />
+      </div>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {recoverableState && (
         <div className="fixed inset-x-0 top-2 z-50 mx-auto max-w-lg rounded-xl border border-amber-500/60 bg-amber-900/90 p-4 text-amber-100 shadow-lg">
