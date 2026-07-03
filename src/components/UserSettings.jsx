@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const APP_VERSION = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "0.0.0";
+
 const UserSettings = ({ 
   notificationPreferences,
   onUpdateNotificationPreferences,
@@ -210,6 +212,10 @@ const UserSettings = ({
               </label>
             </div>
           </div>
+        </div>
+
+        <div className="mb-2 text-right text-xs text-slate-500">
+          App Version {APP_VERSION}
         </div>
 
         {message && (
