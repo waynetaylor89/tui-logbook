@@ -40,8 +40,11 @@ export default function RecordsPage({
     setSearchTerm("");
   };
 
-  const displayHistory = isAdvancedSearchActive ? searchResults : paginatedHistory;
+  const advancedTotalPages = Math.max(1, Math.ceil(searchResults.length / 10));
+  const advancedPaginatedHistory = searchResults.slice((currentPage - 1) * 10, currentPage * 10);
+  const displayHistory = isAdvancedSearchActive ? advancedPaginatedHistory : paginatedHistory;
   const displayTotal = isAdvancedSearchActive ? searchResults.length : currentUserHistoryLength;
+  const displayTotalPages = isAdvancedSearchActive ? advancedTotalPages : totalPages;
 
   return (
     <div className="space-y-4">
@@ -105,7 +108,7 @@ export default function RecordsPage({
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           tuiAircraftTypes={tuiAircraftTypes}
-          totalPages={Math.ceil(displayHistory.length / 10)}
+          totalPages={displayTotalPages}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           typeFilteredHistory={typeFilteredHistory}
