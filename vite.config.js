@@ -116,15 +116,15 @@ export default defineConfig({
       },
 
       manifest: {
-        id: './',
-        name: 'TUI Logbook V2',
-        short_name: 'TUI V2',
+        id: '/',
+        name: 'TUI Aircraft Logbook',
+        short_name: 'TUI Logbook',
         description: 'Aircraft movement logging app',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
-        start_url: './',
-        scope: './',
+        start_url: '/',
+        scope: '/',
         orientation: 'portrait',
 
         icons: [
