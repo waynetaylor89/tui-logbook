@@ -2,7 +2,8 @@ import PropTypes from "prop-types";
 import { memo } from "react";
 import { AVIATION_COLORS } from "../config/logbookConfig.js";
 
-const APP_BUILD = typeof __APP_BUILD__ !== "undefined" ? __APP_BUILD__ : "01";
+const APP_BUILD = typeof __APP_BUILD__ !== "undefined" ? __APP_BUILD__ : "0";
+const APP_REVISION = typeof __APP_REVISION__ !== "undefined" ? __APP_REVISION__ : "local";
 
 const Header = memo(function Header({ fleetCount, currentUser, isAdmin, onLogout, darkMode }) {
   return (
@@ -14,7 +15,7 @@ const Header = memo(function Header({ fleetCount, currentUser, isAdmin, onLogout
             TUI Aircraft Logbook
           </h1>
           <span className="rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-semibold text-cyan-200 sm:text-xs">
-            Build {APP_BUILD}
+            Build {APP_BUILD} ({APP_REVISION})
           </span>
         </div>
 

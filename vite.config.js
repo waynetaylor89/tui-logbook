@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -5,10 +6,24 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 const basePath = process.env.VITE_BASE_PATH || '/'
 
+const getGitValue = (command, fallback) => {
+  try {
+    return execSync(command, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() || fallback
+  } catch {
+    return fallback
+  }
+}
+
+const gitBuildNumber = getGitValue('git rev-list --count HEAD', '0')
+const gitRevision = getGitValue('git rev-parse --short HEAD', 'local')
+const appBuild = process.env.APP_BUILD || gitBuildNumber
+const appRevision = process.env.APP_REVISION || gitRevision
+
 export default defineConfig({
   base: basePath,
   define: {
-    __APP_BUILD__: JSON.stringify(process.env.APP_BUILD || "01"),
+    __APP_BUILD__: JSON.stringify(appBuild),
+    __APP_REVISION__: JSON.stringify(appRevision),
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || "0.0.0"),
   },
   build: {
