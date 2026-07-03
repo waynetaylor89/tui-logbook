@@ -4,6 +4,44 @@ import { NoRecordsEmpty, NoResultsEmpty } from "../components/EmptyState.jsx";
 import AdvancedSearch from "../components/AdvancedSearch.jsx";
 import ExportOptions from "../components/ExportOptions.jsx";
 
+const DEFAULT_DATE_TEXT = "01.01.2026";
+
+const parseRecordDateValue = (dateValue, timeValue = "") => {
+  const rawDate = String(dateValue || "").trim();
+  const rawTime = String(timeValue || "").trim();
+  const dateToUse = rawDate || DEFAULT_DATE_TEXT;
+
+  let year;
+  let month;
+  let day;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateToUse)) {
+    [year, month, day] = dateToUse.split("-").map(Number);
+  } else {
+    const dottedMatch = dateToUse.match(/^(\d{1,2})\.(\d{1,2})(?:\.(\d{2}|\d{4}))?$/);
+    if (!dottedMatch) {
+      return new Date(2026, 0, 1).getTime();
+    }
+
+    day = Number(dottedMatch[1]);
+    month = Number(dottedMatch[2]);
+    if (!dottedMatch[3]) {
+      year = 2026;
+    } else if (dottedMatch[3].length === 2) {
+      year = 2000 + Number(dottedMatch[3]);
+    } else {
+      year = Number(dottedMatch[3]);
+    }
+  }
+
+  const timeMatch = rawTime.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  const hours = timeMatch ? Number(timeMatch[1]) : 0;
+  const minutes = timeMatch ? Number(timeMatch[2]) : 0;
+  const seconds = timeMatch ? Number(timeMatch[3] || 0) : 0;
+
+  return new Date(year, month - 1, day, hours, minutes, seconds).getTime();
+};
+
 export default function RecordsPage({
   currentUserHistoryLength,
   paginatedHistory,
@@ -27,6 +65,7 @@ export default function RecordsPage({
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [isAdvancedSearchActive, setIsAdvancedSearchActive] = useState(false);
+  const [dateSortDirection, setDateSortDirection] = useState("desc");
 
   const handleAdvancedSearch = (results) => {
     setSearchResults(results);
@@ -40,11 +79,16 @@ export default function RecordsPage({
     setSearchTerm("");
   };
 
-  const advancedTotalPages = Math.max(1, Math.ceil(searchResults.length / 10));
-  const advancedPaginatedHistory = searchResults.slice((currentPage - 1) * 10, currentPage * 10);
-  const displayHistory = isAdvancedSearchActive ? advancedPaginatedHistory : paginatedHistory;
-  const displayTotal = isAdvancedSearchActive ? searchResults.length : currentUserHistoryLength;
-  const displayTotalPages = isAdvancedSearchActive ? advancedTotalPages : totalPages;
+  const baseHistory = isAdvancedSearchActive ? searchResults : typeFilteredHistory;
+  const sortedHistory = [...baseHistory].sort((left, right) => {
+    const leftTime = parseRecordDateValue(left.date, left.time);
+    const rightTime = parseRecordDateValue(right.date, right.time);
+    return dateSortDirection === "asc" ? leftTime - rightTime : rightTime - leftTime;
+  });
+
+  const displayTotal = sortedHistory.length;
+  const displayTotalPages = Math.max(1, Math.ceil(displayTotal / 10));
+  const displayHistory = sortedHistory.slice((currentPage - 1) * 10, currentPage * 10);
 
   return (
     <div className="space-y-4">
@@ -111,6 +155,8 @@ export default function RecordsPage({
           totalPages={displayTotalPages}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
+          dateSortDirection={dateSortDirection}
+          setDateSortDirection={setDateSortDirection}
           typeFilteredHistory={typeFilteredHistory}
           exportLogbook={exportLogbook}
           stats={stats}

@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const DEFAULT_DATE_TEXT = "01.01.2026";
+
 export default function RecordsPanel({
   paginatedHistory,
   deleteEntry,
@@ -12,6 +14,8 @@ export default function RecordsPanel({
   totalPages,
   currentPage,
   setCurrentPage,
+  dateSortDirection,
+  setDateSortDirection,
   exportLogbook,
   stats,
 }) {
@@ -109,16 +113,32 @@ export default function RecordsPanel({
 
         </div>
 
-        {/* Search */}
-        <input
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          placeholder="Search records..."
-          className="w-full rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-3 text-slate-100 placeholder:text-slate-500"
-        />
+        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
+          <input
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search records..."
+            className="w-full rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-3 text-slate-100 placeholder:text-slate-500"
+          />
+
+          <label className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-3 text-sm text-slate-300">
+            <span>Date Sort</span>
+            <select
+              value={dateSortDirection}
+              onChange={(e) => {
+                setDateSortDirection(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="ml-auto rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-slate-100"
+            >
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </label>
+        </div>
 
       </div>
 
@@ -132,6 +152,7 @@ export default function RecordsPanel({
         )}
 
         {paginatedHistory.map((item) => {
+          const displayDate = item.date || DEFAULT_DATE_TEXT;
           const editedLabel =
             item.updatedAt && item.updatedBy
               ? `Edited by ${item.updatedBy} on ${new Date(item.updatedAt).toLocaleString()}`
@@ -156,12 +177,10 @@ export default function RecordsPanel({
                 </div>
 
                 <div className="flex min-h-[52px] items-center justify-center pt-1 text-center text-sm text-slate-300">
-                  {(item.date || item.time) ? (
-                    <div className="rounded-lg border border-slate-700/80 bg-slate-950/60 px-4 py-2 leading-tight">
-                      <div>{item.date || ""}</div>
-                      {item.time && <div className="text-xs text-slate-400">{item.time}</div>}
-                    </div>
-                  ) : null}
+                  <div className="rounded-lg border border-slate-700/80 bg-slate-950/60 px-4 py-2 leading-tight">
+                    <div>{displayDate}</div>
+                    {item.time && <div className="text-xs text-slate-400">{item.time}</div>}
+                  </div>
                 </div>
 
                 <div className="min-w-[96px] text-right">
