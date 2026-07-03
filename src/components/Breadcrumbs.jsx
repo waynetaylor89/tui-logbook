@@ -24,11 +24,11 @@ const Breadcrumbs = memo(function Breadcrumbs() {
         <span key={routeTo} className="flex items-center">
           {index > 0 && <span className="mx-2 text-slate-400">/</span>}
           {isLast ? (
-            <span className="text-slate-900 dark:text-slate-100 font-medium">{displayName}</span>
+            <span className="text-cyan-100 font-medium">{displayName}</span>
           ) : (
             <Link 
               to={routeTo} 
-              className="text-blue-600 hover:text-blue-800 dark:text-sky-400 dark:hover:text-sky-300 transition-colors"
+              className="text-cyan-300 hover:text-cyan-200 transition-colors"
             >
               {displayName}
             </Link>
@@ -39,8 +39,8 @@ const Breadcrumbs = memo(function Breadcrumbs() {
   };
 
   return (
-    <nav className="flex items-center space-x-1 text-sm py-2 px-4 bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl">
-      <Link to="/" className="text-blue-600 hover:text-blue-800 dark:text-sky-400 dark:hover:text-sky-300 transition-colors">
+    <nav className="flex items-center space-x-1 text-sm py-2 px-4 bg-slate-900/80 border border-cyan-900/60 rounded-xl">
+      <Link to="/" className="text-cyan-300 hover:text-cyan-200 transition-colors">
         🏠
       </Link>
       {getBreadcrumbs()}

@@ -1,24 +1,37 @@
 import { useMemo } from "react";
 
+const BAR_COLORS = {
+  sky: "#38bdf8",
+  blue: "#60a5fa",
+  indigo: "#818cf8",
+  purple: "#a78bfa",
+  pink: "#f472b6",
+};
+
 const SimpleBarChart = ({ data, title, color = "sky" }) => {
   const maxValue = Math.max(...data.map(item => item.value), 1);
+  const barColor = BAR_COLORS[color] || BAR_COLORS.sky;
   
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm border border-slate-200">
-      <h3 className="text-sm font-medium text-slate-700 mb-3">{title}</h3>
+    <div className="rounded-xl p-4 border border-cyan-900/60 bg-slate-950/65 shadow-[0_0_20px_rgba(6,182,212,0.08)]">
+      <h3 className="text-sm font-medium text-cyan-100 mb-3">{title}</h3>
       <div className="space-y-2">
         {data.map((item, index) => (
           <div key={index} className="flex items-center gap-2">
-            <div className="w-24 text-xs text-slate-600 truncate" title={item.label}>
+            <div className="w-24 text-xs text-slate-300 truncate" title={item.label}>
               {item.label}
             </div>
-            <div className="flex-1 bg-slate-100 rounded-full h-4 relative overflow-hidden">
+            <div className="flex-1 bg-slate-800 rounded-full h-4 relative overflow-hidden border border-cyan-900/40">
               <div 
-                className={`absolute left-0 top-0 h-full bg-${color}-500 rounded-full transition-all duration-500`}
-                style={{ width: `${(item.value / maxValue) * 100}%` }}
+                className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"
+                style={{
+                  backgroundColor: barColor,
+                  boxShadow: `0 0 10px ${barColor}`,
+                  width: `${(item.value / maxValue) * 100}%`,
+                }}
               />
             </div>
-            <div className="text-xs font-medium text-slate-700 w-8 text-right">
+            <div className="text-xs font-medium text-cyan-100 w-8 text-right">
               {item.value}
             </div>
           </div>
@@ -32,19 +45,20 @@ const SimplePieChart = ({ data, title }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm border border-slate-200">
-      <h3 className="text-sm font-medium text-slate-700 mb-3">{title}</h3>
+    <div className="rounded-xl p-4 border border-cyan-900/60 bg-slate-950/65 shadow-[0_0_20px_rgba(6,182,212,0.08)]">
+      <h3 className="text-sm font-medium text-cyan-100 mb-3">{title}</h3>
       <div className="space-y-2">
         {data.map((item, index) => {
           const percentage = total > 0 ? (item.value / total) * 100 : 0;
           const colors = ["sky", "blue", "indigo", "purple", "pink"];
           const color = colors[index % colors.length];
+          const dotColor = BAR_COLORS[color] || BAR_COLORS.sky;
           
           return (
             <div key={index} className="flex items-center gap-2">
-              <div className={`w-3 h-3 bg-${color}-500 rounded-full`} />
-              <div className="flex-1 text-xs text-slate-600">{item.label}</div>
-              <div className="text-xs font-medium text-slate-700">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: dotColor }} />
+              <div className="flex-1 text-xs text-slate-300">{item.label}</div>
+              <div className="text-xs font-medium text-cyan-100">
                 {item.value} ({percentage.toFixed(1)}%)
               </div>
             </div>
@@ -59,17 +73,21 @@ const SimpleLineChart = ({ data, title }) => {
   const maxValue = Math.max(...data.map(item => item.value), 1);
   
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm border border-slate-200">
-      <h3 className="text-sm font-medium text-slate-700 mb-3">{title}</h3>
+    <div className="rounded-xl p-4 border border-cyan-900/60 bg-slate-950/65 shadow-[0_0_20px_rgba(6,182,212,0.08)]">
+      <h3 className="text-sm font-medium text-cyan-100 mb-3">{title}</h3>
       <div className="h-24 flex items-end gap-1">
         {data.map((item, index) => (
           <div key={index} className="flex-1 flex flex-col items-center">
             <div 
-              className="w-full bg-sky-500 rounded-t transition-all duration-500 hover:bg-sky-600"
-              style={{ height: `${(item.value / maxValue) * 100}%` }}
+              className="w-full rounded-t transition-all duration-500"
+              style={{
+                backgroundColor: BAR_COLORS.sky,
+                boxShadow: "0 0 10px rgba(56, 189, 248, 0.55)",
+                height: `${(item.value / maxValue) * 100}%`,
+              }}
               title={`${item.label}: ${item.value}`}
             />
-            <div className="text-xs text-slate-500 mt-1 truncate w-full text-center">
+            <div className="text-xs text-slate-400 mt-1 truncate w-full text-center">
               {item.label}
             </div>
           </div>

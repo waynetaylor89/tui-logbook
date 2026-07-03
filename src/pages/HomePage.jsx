@@ -1,5 +1,4 @@
 import FleetManager from "../components/FleetManager.jsx";
-import StatsCards from "../components/StatsCards.jsx";
 import { MovementStatsChart, DailyTrendChart } from "../components/Charts.jsx";
 
 export default function HomePage({
@@ -17,18 +16,10 @@ export default function HomePage({
 }) {
   return (
     <div className="space-y-5">
-      <section className="rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 sm:p-5 shadow-lg">
-        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Statistics Overview</h2>
-          <div className="text-sm text-slate-500 dark:text-slate-400">Live movement tracking</div>
-        </div>
-        <StatsCards stats={stats} />
-      </section>
-
-      <section className="rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 sm:p-5 shadow-lg space-y-4">
+      <section className="rounded-2xl border border-cyan-900/60 bg-slate-900/80 p-4 sm:p-5 shadow-lg space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Analytics Dashboard</h2>
-            <div className="text-sm text-slate-500 dark:text-slate-400">Visual insights from your data</div>
+          <h2 className="text-2xl font-bold text-cyan-100">Analytics Dashboard</h2>
+            <div className="text-sm text-slate-300">Visual insights from your data</div>
           </div>
 
         <MovementStatsChart stats={stats} />
@@ -42,26 +33,26 @@ export default function HomePage({
       </section>
 
       {isAdmin && userSummary.length > 0 && (
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-4 sm:p-5 border border-slate-200/80 dark:border-slate-700">
+        <section className="bg-slate-900/80 rounded-2xl shadow-lg p-4 sm:p-5 border border-cyan-900/60">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">User Movement Summary</h3>
-              <div className="text-sm text-slate-500 dark:text-slate-400">Ranked by total movements logged.</div>
+              <h3 className="text-xl font-bold text-cyan-100">User Movement Summary</h3>
+              <div className="text-sm text-slate-300">Ranked by total movements logged.</div>
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-slate-700 dark:text-slate-300">
+            <table className="min-w-full text-left text-sm text-slate-200">
               <thead>
                 <tr>
-                  <th className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400">User</th>
-                  <th className="px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Movements</th>
+                  <th className="px-4 py-3 font-medium text-slate-400">User</th>
+                  <th className="px-4 py-3 font-medium text-slate-400">Movements</th>
                 </tr>
               </thead>
               <tbody>
                 {userSummary.map((row) => (
-                  <tr key={row.username} className="border-t dark:border-slate-700">
+                  <tr key={row.username} className="border-t border-cyan-900/50">
                     <td className="px-4 py-3">{row.username}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">{row.movements}</td>
+                    <td className="px-4 py-3 font-semibold text-cyan-100">{row.movements}</td>
                   </tr>
                 ))}
               </tbody>

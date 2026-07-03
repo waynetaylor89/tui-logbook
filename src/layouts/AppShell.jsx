@@ -8,29 +8,27 @@ import { AVIATION_COLORS } from "../config/logbookConfig.js";
 const navClass = ({ isActive }) => {
   const baseClasses = "px-3 py-1.5 rounded-lg font-medium text-sm transition-all duration-200 border";
   if (isActive) {
-    return `${baseClasses} text-white shadow-md border-sky-400/50 bg-gradient-to-r from-sky-600 to-blue-600`;
+    return `${baseClasses} text-cyan-100 shadow-md border-cyan-300/60 bg-gradient-to-r from-cyan-700/80 to-blue-700/80`;
   }
-  return `${baseClasses} text-slate-700 border-slate-200 bg-white/90 hover:bg-white dark:bg-slate-800/80 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700/80`;
+  return `${baseClasses} text-cyan-100 border-cyan-900/70 bg-slate-950/75 hover:bg-slate-900/90`;
 };
 
 export default function AppShell({ fleetCount, currentUser, isAdmin, onLogout, darkMode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const shellTheme = darkMode
-    ? "from-slate-950 via-slate-900 to-cyan-950"
-    : "from-slate-100 via-sky-100 to-cyan-100";
+  const shellTheme = "from-slate-950 via-slate-900 to-cyan-950";
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${shellTheme}`}>
+    <div className={`min-h-screen bg-gradient-to-br ${shellTheme} ops-grid-bg`}>
       <div className="min-h-screen p-3 lg:p-6">
-        <div className="max-w-7xl mx-auto space-y-4 rounded-3xl border border-white/10 bg-slate-900/35 p-3 sm:p-4 lg:p-6 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto space-y-4 rounded-3xl border border-cyan-900/60 bg-slate-950/55 p-3 sm:p-4 lg:p-6 backdrop-blur-sm shadow-[0_0_35px_rgba(6,182,212,0.15)]">
           {/* Mobile Navigation */}
-          <div className={`lg:hidden rounded-2xl shadow-lg p-4 border ${darkMode ? 'bg-slate-800/95 border-slate-700' : 'bg-white/95 border-slate-200'}`}>
+          <div className="lg:hidden rounded-2xl shadow-lg p-4 border bg-slate-900/85 border-cyan-900/60">
             <div className="flex justify-between items-center">
-              <h1 className={`text-lg font-bold`} style={{ color: AVIATION_COLORS.primary }}>TUI Logbook</h1>
+              <h1 className="text-lg font-bold" style={{ color: AVIATION_COLORS.accent }}>TUI Logbook</h1>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-sky-100 hover:bg-sky-200'}`}
-                style={{ color: AVIATION_COLORS.primary }}
+                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-cyan-900/60"
+                style={{ color: AVIATION_COLORS.accent }}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {isMobileMenuOpen ? (
@@ -43,7 +41,7 @@ export default function AppShell({ fleetCount, currentUser, isAdmin, onLogout, d
             </div>
             
             {isMobileMenuOpen && (
-              <div className="mt-4 space-y-2 border-t border-slate-200 dark:border-slate-700 pt-3">
+              <div className="mt-4 space-y-2 border-t border-cyan-900/60 pt-3">
                 <NavLink to="/" end className={navClass} onClick={() => setIsMobileMenuOpen(false)}>
                   Home
                 </NavLink>
@@ -66,8 +64,8 @@ export default function AppShell({ fleetCount, currentUser, isAdmin, onLogout, d
           </div>
 
           {/* Desktop Navigation */}
-          <div className={`hidden lg:flex rounded-2xl shadow-lg p-4 flex-wrap items-center justify-between gap-3 border ${darkMode ? 'bg-slate-800/90 backdrop-blur-sm border-slate-700' : 'bg-white/90 backdrop-blur-sm border-sky-100'}`}>
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Operations Navigation</div>
+          <div className="hidden lg:flex rounded-2xl shadow-lg p-4 flex-wrap items-center justify-between gap-3 border bg-slate-900/85 backdrop-blur-sm border-cyan-900/60">
+            <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/70">Operations Navigation</div>
             <div className="flex flex-wrap gap-2">
             <NavLink to="/" end className={navClass}>
               Home
@@ -91,7 +89,7 @@ export default function AppShell({ fleetCount, currentUser, isAdmin, onLogout, d
 
           <Breadcrumbs />
           <Header fleetCount={fleetCount} currentUser={currentUser} isAdmin={isAdmin} onLogout={onLogout} />
-          <div className="rounded-2xl border border-slate-200/70 bg-white/95 p-4 shadow-xl dark:border-slate-700 dark:bg-slate-900/90">
+          <div className="rounded-2xl border border-cyan-900/60 bg-slate-900/80 p-4 shadow-xl">
             <Outlet />
           </div>
         </div>

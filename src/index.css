@@ -8,11 +8,21 @@
 	}
 
 	body {
-		@apply antialiased text-slate-900;
+		@apply antialiased text-slate-100;
 		background:
-			radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.08), transparent 40%),
-			radial-gradient(circle at 90% 15%, rgba(14, 116, 144, 0.12), transparent 45%),
-			linear-gradient(120deg, #020617 0%, #0b1530 45%, #082f49 100%);
+			radial-gradient(circle at 10% 10%, rgba(34, 211, 238, 0.1), transparent 35%),
+			radial-gradient(circle at 90% 15%, rgba(14, 116, 144, 0.16), transparent 45%),
+			linear-gradient(130deg, #010b1f 0%, #041634 45%, #032c46 100%);
 		background-attachment: fixed;
+	}
+}
+
+@layer components {
+	.ops-grid-bg {
+		background-image:
+			linear-gradient(rgba(34, 211, 238, 0.08) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(34, 211, 238, 0.08) 1px, transparent 1px);
+		background-size: 24px 24px;
+		background-position: center;
 	}
 }
