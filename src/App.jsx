@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, lazy, Suspense } from "react";
+import { useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 // Login screen removed — assume `currentUser` is always available.
 import UserSettings from "./components/UserSettings.jsx";
@@ -26,6 +26,28 @@ const HomePage = lazy(() => import("./pages/HomePage.jsx"));
 const MovementsPage = lazy(() => import("./pages/MovementsPage.jsx"));
 const RecordsPage = lazy(() => import("./pages/RecordsPage.jsx"));
 const UsersPage = lazy(() => import("./pages/UsersPage.jsx"));
+
+const RECOVERY_BASELINE_ENTRY = {
+  id: "recovery-baseline-2026-06-21-1515",
+  aircraft: "G-RECOVERY - Boeing 737-800",
+  movementType: "Tow",
+  fromStand: "21",
+  toStand: "151",
+  movementDate: "21/06/2026",
+  movementTime: "15:15",
+  createdAt: "2026-06-21T15:15:00",
+  updatedAt: "2026-06-21T15:15:00",
+  notes: "Recovery baseline",
+};
+
+const RECOVERY_BASELINE_STORAGE_PREFIX = "recovery-baseline-applied-v1";
+
+const isRecoveryBaselineEntry = (entry = {}) =>
+  entry.id === RECOVERY_BASELINE_ENTRY.id ||
+  (
+    String(entry.createdAt || "").trim() === RECOVERY_BASELINE_ENTRY.createdAt &&
+    String(entry.notes || "").trim() === RECOVERY_BASELINE_ENTRY.notes
+  );
 
 export default function AircraftMovementLogbook() {
   // Zustand store
@@ -87,6 +109,7 @@ export default function AircraftMovementLogbook() {
   const [importError, setImportError] = useState("");
   const [recoverableState, setRecoverableState] = useState(null);
   const [reminderCheckpoint, setReminderCheckpoint] = useState(0);
+  const recoveryAppliedRef = useRef(false);
 
   useEffect(() => {
   if (currentUser && history[currentUser]) {
@@ -119,6 +142,32 @@ export default function AircraftMovementLogbook() {
       setRecoverableState(candidate);
     }
   }, [hasHydrated, history, recoveryPromptIgnored]);
+
+  useEffect(() => {
+    if (!hasHydrated || !currentUser || recoveryAppliedRef.current) return;
+
+    const storageKey = `${RECOVERY_BASELINE_STORAGE_PREFIX}:${currentUser}`;
+    const alreadyApplied = localStorage.getItem(storageKey) === "done";
+    const alreadyExists = Object.values(history || {})
+      .flat()
+      .some((entry) => isRecoveryBaselineEntry(entry));
+
+    if (alreadyApplied || alreadyExists) {
+      if (alreadyExists && !alreadyApplied) {
+        localStorage.setItem(storageKey, "done");
+      }
+      recoveryAppliedRef.current = true;
+      return;
+    }
+
+    recoveryAppliedRef.current = true;
+    localStorage.setItem(storageKey, "done");
+    addLogEntryToHistory({
+      ...RECOVERY_BASELINE_ENTRY,
+      createdBy: currentUser,
+      airport: AIRPORT,
+    });
+  }, [hasHydrated, currentUser, history]);
 
   const currentUserHistory = useMemo(() => history[currentUser] || [], [history, currentUser]);
 
