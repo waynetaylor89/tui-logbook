@@ -69,6 +69,14 @@ const UserSettings = ({
     event.target.value = "";
   };
 
+  const handleCsvImportSelection = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setImportFileName(file.name);
+    await onAnalyzeImport?.(file);
+    event.target.value = "";
+  };
+
   return (
     <div className="space-y-4">
       <div className="ops-panel mx-auto max-w-3xl rounded-2xl p-6">
@@ -247,8 +255,15 @@ const UserSettings = ({
               <button onClick={onExportCsv} className="rounded-md bg-emerald-600 px-3 py-2 text-white hover:bg-emerald-500">Export CSV</button>
               <button onClick={onExportJson} className="rounded-md bg-sky-600 px-3 py-2 text-white hover:bg-sky-500">Export Full Backup</button>
               <label className="cursor-pointer rounded-md bg-cyan-700 px-3 py-2 text-center text-white hover:bg-cyan-600">
-                Restore Backup
-                <input type="file" accept=".json,.csv,text/csv,application/json" className="hidden" onChange={handleImportSelection} />
+                Restore JSON Backup
+                <input type="file" accept=".json,application/json" className="hidden" onChange={handleImportSelection} />
+              </label>
+            </div>
+
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <label className="cursor-pointer rounded-md bg-cyan-600 px-3 py-2 text-center text-white hover:bg-cyan-500 sm:col-span-3">
+                Import CSV
+                <input type="file" accept=".csv,text/csv" className="hidden" onChange={handleCsvImportSelection} />
               </label>
             </div>
 
