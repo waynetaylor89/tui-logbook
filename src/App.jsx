@@ -12,6 +12,12 @@ import { AIRPORT, AIRPORT_STANDS, MOVEMENT_TYPES, TUI_AIRCRAFT_TYPES } from "./c
 import useLogbookStore from "./store/useLogbookStore.js";
 import { useMovementForm } from "./hooks/useMovementForm.js";
 import { useMovementFilters } from "./hooks/useMovementFilters.js";
+import { createBackupPayload, downloadJsonBackup, getJsonBackupFilename, validateBackupPayload } from "./services/jsonBackupService.js";
+import { createAutomaticBackup, markManualBackup } from "./services/backupService.js";
+import { findRecoverableState } from "./services/backupRecoveryService.js";
+import { analyzeImportFile } from "./services/importWizardService.js";
+import { importMovementsFromCsvRows, restoreFromJsonBackup } from "./services/restoreService.js";
+import { exportMovementsToCsv, getCsvFilename, downloadCsv } from "./services/csvService.js";
 
 // Code split pages for better performance
 const HomePage = lazy(() => import("./pages/HomePage.jsx"));
@@ -38,6 +44,13 @@ export default function AircraftMovementLogbook() {
     toggleDarkMode,
     getDarkMode,
     isAdmin,
+    setHistory,
+    createAutomaticBackup: storeAutoBackup,
+    backupMeta,
+    backupRemindersEnabled,
+    setBackupRemindersEnabled,
+    recoveryPromptIgnored,
+    setRecoveryPromptIgnored,
   } = useLogbookStore();
 
   const handleDeleteUser = (username) => {
@@ -68,6 +81,10 @@ export default function AircraftMovementLogbook() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [importPreview, setImportPreview] = useState(null);
+  const [importError, setImportError] = useState("");
+  const [recoverableState, setRecoverableState] = useState(null);
+  const [reminderCheckpoint, setReminderCheckpoint] = useState(0);
 
   useEffect(() => {
   if (currentUser && history[currentUser]) {
@@ -90,6 +107,16 @@ export default function AircraftMovementLogbook() {
     */
   }
 }, [currentUser, history]);
+
+  useEffect(() => {
+    if (!hasHydrated || recoveryPromptIgnored) return;
+    const hasHistory = Object.values(history || {}).some((entries) => Array.isArray(entries) && entries.length > 0);
+    if (hasHistory) return;
+    const candidate = findRecoverableState();
+    if (candidate) {
+      setRecoverableState(candidate);
+    }
+  }, [hasHydrated, history, recoveryPromptIgnored]);
 
   const currentUserHistory = useMemo(() => history[currentUser] || [], [history, currentUser]);
 
@@ -298,6 +325,119 @@ export default function AircraftMovementLogbook() {
     exportLogbookCSV(exportData);
   };
 
+  const validateCsvExport = (movements) => {
+    if (!Array.isArray(movements)) {
+      return { valid: false, error: "Export failed: movement data is invalid." };
+    }
+    return { valid: true };
+  };
+
+  const handleExportCsvValidated = () => {
+    const data = isAdmin(currentUser) ? allHistory : currentUserHistory;
+    const validation = validateCsvExport(data);
+    if (!validation.valid) {
+      addToast(validation.error, "error");
+      return;
+    }
+
+    const csv = exportMovementsToCsv(data);
+    const filename = getCsvFilename(new Date());
+    downloadCsv(csv, filename);
+    markManualBackup({ format: "CSV", movementCount: data.length, sizeBytes: new Blob([csv]).size });
+    addToast("Backup created successfully.", "success");
+  };
+
+  const handleExportJsonBackup = () => {
+    const stateSnapshot = useLogbookStore.getState();
+    const payload = createBackupPayload(stateSnapshot);
+    const validation = validateBackupPayload(payload);
+    if (!validation.valid) {
+      addToast(validation.error, "error");
+      return;
+    }
+
+    const filename = getJsonBackupFilename(new Date());
+    downloadJsonBackup(payload, filename);
+    const json = JSON.stringify(payload);
+    markManualBackup({
+      format: "JSON",
+      movementCount: Object.values(payload.data?.history || {}).flat().length,
+      sizeBytes: new Blob([json]).size,
+    });
+    addToast("Backup created successfully.", "success");
+  };
+
+  const handleAnalyzeImport = async (file) => {
+    setImportError("");
+    setImportPreview(null);
+    try {
+      const analysis = await analyzeImportFile({ file, currentHistory: history, currentUser });
+      setImportPreview(analysis);
+    } catch (error) {
+      setImportError(error.message || "Import analysis failed.");
+    }
+  };
+
+  const handleImportConfirmed = () => {
+    if (!importPreview) return;
+
+    try {
+      if (importPreview.type === "json") {
+        const restored = restoreFromJsonBackup(importPreview.parsed, useLogbookStore.getState());
+        useLogbookStore.setState(restored, true);
+        createAutomaticBackup(useLogbookStore.getState(), "restore-json");
+        addToast(`Imported ${importPreview.found} records from JSON backup.`, "success");
+      } else {
+        const result = importMovementsFromCsvRows({
+          rows: importPreview.rows,
+          currentHistory: useLogbookStore.getState().history,
+          currentUser,
+        });
+
+        setHistory(result.history, { allowReset: true });
+        storeAutoBackup?.("import-csv");
+        addToast(`Imported ${result.importedCount}, skipped duplicates ${result.skippedDuplicates}, failed ${result.failed}.`, "success");
+      }
+
+      setImportPreview(null);
+      setImportError("");
+    } catch (error) {
+      setImportError(error.message || "Import failed.");
+    }
+  };
+
+  const handleRecoverNow = () => {
+    if (!recoverableState?.state) return;
+    const next = {
+      ...useLogbookStore.getState(),
+      ...recoverableState.state,
+    };
+    useLogbookStore.setState(next, true);
+    createAutomaticBackup(useLogbookStore.getState(), "recovery-mode");
+    setRecoverableState(null);
+    setRecoveryPromptIgnored(false);
+    addToast("Recovery completed successfully.", "success");
+  };
+
+  const handleIgnoreRecovery = () => {
+    setRecoverableState(null);
+    setRecoveryPromptIgnored(true);
+  };
+
+  useEffect(() => {
+    const movementCount = currentUserHistory.length;
+    if (!backupRemindersEnabled) return;
+    if (movementCount < 20) return;
+    if (movementCount % 20 !== 0) return;
+    if (movementCount === reminderCheckpoint) return;
+
+    setReminderCheckpoint(movementCount);
+    const shouldBackup = window.confirm(`You now have ${movementCount} movements. Would you like to create a backup?`);
+    if (shouldBackup) {
+      handleExportJsonBackup();
+    }
+  }, [currentUserHistory.length, backupRemindersEnabled, reminderCheckpoint]);
+
   // Assume `currentUser` is always available — skip login screen.
 
   if (!hasHydrated) {
@@ -310,6 +450,16 @@ export default function AircraftMovementLogbook() {
   return (
     <ErrorBoundary>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
+      {recoverableState && (
+        <div className="fixed inset-x-0 top-2 z-50 mx-auto max-w-lg rounded-xl border border-amber-500/60 bg-amber-900/90 p-4 text-amber-100 shadow-lg">
+          <div className="font-semibold">Older logbook detected. Recover now?</div>
+          <div className="mt-2 text-sm">Source: {recoverableState.source}</div>
+          <div className="mt-3 flex gap-2">
+            <button onClick={handleRecoverNow} className="rounded bg-emerald-600 px-3 py-1.5 text-white">Recover</button>
+            <button onClick={handleIgnoreRecovery} className="rounded bg-slate-700 px-3 py-1.5 text-white">Ignore</button>
+          </div>
+        </div>
+      )}
       {isLoading && <LoadingOverlay message={loadingMessage} />}
       <Suspense fallback={<LoadingOverlay message="Loading page..." />}>
         <Routes>
@@ -421,6 +571,17 @@ export default function AircraftMovementLogbook() {
               onUpdateNotificationPreferences={updateNotificationPreferences}
               darkMode={getDarkMode(currentUser)}
               onToggleDarkMode={() => toggleDarkMode(currentUser)}
+              onExportCsv={handleExportCsvValidated}
+              onExportJson={handleExportJsonBackup}
+              onAnalyzeImport={handleAnalyzeImport}
+              onImportConfirmed={handleImportConfirmed}
+              onImportCancel={() => setImportPreview(null)}
+              importPreview={importPreview}
+              importError={importError}
+              backupMeta={backupMeta}
+              movementCount={currentUserHistory.length}
+              backupRemindersEnabled={backupRemindersEnabled}
+              onToggleBackupReminders={(value) => setBackupRemindersEnabled(value)}
             />
           }
         />

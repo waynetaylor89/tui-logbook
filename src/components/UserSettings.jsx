@@ -24,6 +24,17 @@ const UserSettings = ({
   onUpdateNotificationPreferences,
   darkMode,
   onToggleDarkMode,
+  onExportCsv,
+  onExportJson,
+  onAnalyzeImport,
+  onImportConfirmed,
+  onImportCancel,
+  importPreview,
+  importError,
+  backupMeta,
+  movementCount,
+  backupRemindersEnabled,
+  onToggleBackupReminders,
   selectedAirline = "TUI Airways",
   showOtherAirlines = false,
   onSetShowOtherAirlines
@@ -31,6 +42,7 @@ const UserSettings = ({
   const [message, setMessage] = useState("");
   const [notificationEnabled, setNotificationEnabled] = useState(notificationPreferences?.enabled ?? true);
   const [notificationPeriod, setNotificationPeriod] = useState(notificationPreferences?.periodDays ?? 7);
+  const [importFileName, setImportFileName] = useState("");
   const [reminders, setReminders] = useState({
     ...DEFAULT_REMINDERS,
     ...(notificationPreferences?.reminders || {}),
@@ -47,6 +59,14 @@ const UserSettings = ({
     } else {
       setMessage("Failed to update notification preferences.");
     }
+  };
+
+  const handleImportSelection = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setImportFileName(file.name);
+    await onAnalyzeImport?.(file);
+    event.target.value = "";
   };
 
   return (
@@ -209,6 +229,56 @@ const UserSettings = ({
               </div>
             </div>
           )}
+        </div>
+
+        <div className="mb-6">
+          <h2 className="mb-4 text-xl font-semibold text-slate-100">Backup and Recovery</h2>
+
+          <div className="rounded-xl border border-slate-700 bg-slate-950/40 p-4">
+            <div className="grid gap-2 text-sm text-slate-300">
+              <div>Last Backup: {backupMeta?.lastBackupAt ? new Date(backupMeta.lastBackupAt).toLocaleString() : "Never"}</div>
+              <div>Backup Type: {backupMeta?.backupType || "N/A"}</div>
+              <div>Backup Format: {backupMeta?.format || "N/A"}</div>
+              <div>Movement Count: {backupMeta?.movementCount ?? movementCount ?? 0}</div>
+              <div>Backup Size: {backupMeta?.sizeBytes ? `${backupMeta.sizeBytes} bytes` : "N/A"}</div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <button onClick={onExportCsv} className="rounded-md bg-emerald-600 px-3 py-2 text-white hover:bg-emerald-500">Export CSV</button>
+              <button onClick={onExportJson} className="rounded-md bg-sky-600 px-3 py-2 text-white hover:bg-sky-500">Export Full Backup</button>
+              <label className="cursor-pointer rounded-md bg-cyan-700 px-3 py-2 text-center text-white hover:bg-cyan-600">
+                Restore Backup
+                <input type="file" accept=".json,.csv,text/csv,application/json" className="hidden" onChange={handleImportSelection} />
+              </label>
+            </div>
+
+            <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/60 p-3 text-sm text-slate-300">
+              <div className="font-medium text-slate-100">Import Logbook</div>
+              <div className="mt-1">Supports CSV and JSON.</div>
+              {importFileName && <div className="mt-2">Selected file: {importFileName}</div>}
+              {importPreview && (
+                <div className="mt-2">
+                  <div>{importPreview.found} movements found</div>
+                  <div>{importPreview.newCount} new</div>
+                  <div>{importPreview.duplicateCount} duplicate</div>
+                  <div className="mt-2 flex gap-2">
+                    <button onClick={onImportCancel} className="rounded bg-slate-700 px-3 py-1.5 text-white">Cancel</button>
+                    <button onClick={onImportConfirmed} className="rounded bg-emerald-600 px-3 py-1.5 text-white">Import</button>
+                  </div>
+                </div>
+              )}
+              {importError && <div className="mt-2 text-rose-300">{importError}</div>}
+            </div>
+
+            <label className="mt-4 flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm text-slate-200">
+              <span>Backup reminders every 20 movements</span>
+              <input
+                type="checkbox"
+                checked={backupRemindersEnabled}
+                onChange={(e) => onToggleBackupReminders?.(e.target.checked)}
+              />
+            </label>
+          </div>
         </div>
 
         <div className="mb-6">

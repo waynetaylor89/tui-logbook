@@ -20,6 +20,7 @@ export const createAuthSlice = (set, get) => ({
     const updatedHistory = { ...history };
     delete updatedHistory[username];
     set({ users: updatedUsers, history: updatedHistory });
+    get().createAutomaticBackup?.("delete-user");
   },
 
   resetUserPassword: async () => false,
@@ -39,6 +40,7 @@ export const createAuthSlice = (set, get) => ({
         },
       },
     });
+    get().createAutomaticBackup?.("settings-change");
     return true;
   },
 
@@ -60,6 +62,7 @@ export const createAuthSlice = (set, get) => ({
         },
       },
     });
+    get().createAutomaticBackup?.("settings-change");
     return true;
   },
 

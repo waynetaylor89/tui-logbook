@@ -1,6 +1,15 @@
 export const createMovementsSlice = (set, get) => ({
   history: {},
-  setHistory: (history) => set({ history }),
+  setHistory: (history, options = {}) => {
+    const next = history && typeof history === "object" ? history : {};
+    const isEmpty = Object.keys(next).length === 0;
+    if (isEmpty && !options.allowReset) {
+      return false;
+    }
+    set({ history: next });
+    get().createAutomaticBackup?.("set-history");
+    return true;
+  },
   addLogEntry: (entry) => {
     const history = get().history;
     const currentUser = get().currentUser;
@@ -8,6 +17,7 @@ export const createMovementsSlice = (set, get) => ({
     set({
       history: { ...history, [currentUser]: [entry, ...userHistory] },
     });
+    get().createAutomaticBackup?.("add-movement");
   },
   deleteEntry: (id, owner) => {
     const history = get().history;
@@ -19,6 +29,7 @@ export const createMovementsSlice = (set, get) => ({
         [targetUser]: userHistory.filter((entry) => entry.id !== id),
       },
     });
+    get().createAutomaticBackup?.("delete-movement");
   },
   updateEntry: (id, owner, updates) => {
     const history = get().history;
@@ -40,5 +51,6 @@ export const createMovementsSlice = (set, get) => ({
         ),
       },
     });
+    get().createAutomaticBackup?.("edit-movement");
   },
 });
