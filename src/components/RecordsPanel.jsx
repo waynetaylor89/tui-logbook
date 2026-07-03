@@ -143,23 +143,28 @@ export default function RecordsPanel({
               className="rounded-xl border border-slate-700 bg-slate-900/50 p-4"
             >
 
-              <div className="flex justify-between gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(180px,280px)_auto] items-start gap-4">
 
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="font-bold text-slate-100">
                     {item.aircraft}
                   </div>
 
-                  <div className="text-sm font-medium text-sky-300">
+                  <div className="mt-1 text-sm font-medium text-sky-300">
                     {item.movementType}
-                  </div>
-
-                  <div className="text-sm text-slate-400">
-                    {item.date} • {item.time}
                   </div>
                 </div>
 
-                <div className="text-right">
+                <div className="flex min-h-[52px] items-center justify-center pt-1 text-center text-sm text-slate-300">
+                  {(item.date || item.time) ? (
+                    <div className="rounded-lg border border-slate-700/80 bg-slate-950/60 px-4 py-2 leading-tight">
+                      <div>{item.date || ""}</div>
+                      {item.time && <div className="text-xs text-slate-400">{item.time}</div>}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="min-w-[96px] text-right">
                   <div className="text-sm text-slate-400">
                     Stand Move
                   </div>
