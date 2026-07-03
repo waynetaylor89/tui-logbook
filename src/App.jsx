@@ -172,6 +172,28 @@ export default function AircraftMovementLogbook() {
     };
   }, [allHistory, currentUserHistory]);
 
+  const lastEntryTimestamp = useMemo(() => {
+    const data = isAdmin(currentUser) ? allHistory : currentUserHistory;
+    let latest = null;
+
+    data.forEach((entry) => {
+      const idTimestamp = Number(String(entry.id || "").split("-")[0]);
+      if (Number.isFinite(idTimestamp) && idTimestamp > 0) {
+        latest = latest ? Math.max(latest, idTimestamp) : idTimestamp;
+        return;
+      }
+
+      if (entry.date) {
+        const fallback = new Date(`${entry.date} ${entry.time || "00:00:00"}`).getTime();
+        if (Number.isFinite(fallback)) {
+          latest = latest ? Math.max(latest, fallback) : fallback;
+        }
+      }
+    });
+
+    return latest;
+  }, [allHistory, currentUserHistory, currentUser, isAdmin]);
+
   const userSummary = useMemo(() => {
     if (!isAdmin(currentUser)) return [];
     
@@ -259,6 +281,7 @@ export default function AircraftMovementLogbook() {
               userSummary={userSummary}
               stats={stats}
               history={history}
+              lastEntryTimestamp={lastEntryTimestamp}
               newReg={newReg}
               setNewReg={setNewReg}
               newType={newType}
