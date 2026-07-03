@@ -8,6 +8,7 @@ const basePath = process.env.VITE_BASE_PATH || '/'
 export default defineConfig({
   base: basePath,
   define: {
+    __APP_BUILD__: JSON.stringify(process.env.APP_BUILD || "01"),
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || "0.0.0"),
   },
   build: {
