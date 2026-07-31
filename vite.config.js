@@ -21,6 +21,16 @@ const appRevision = process.env.APP_REVISION || gitRevision
 
 export default defineConfig({
   base: basePath,
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 4173,
+    strictPort: true,
+  },
   define: {
     __APP_BUILD__: JSON.stringify(appBuild),
     __APP_REVISION__: JSON.stringify(appRevision),

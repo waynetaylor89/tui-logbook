@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import "./App.css";
 // Login screen removed — assume `currentUser` is always available.
 import UserSettings from "./components/UserSettings.jsx";
 import AppShell from "./layouts/AppShell.jsx";
