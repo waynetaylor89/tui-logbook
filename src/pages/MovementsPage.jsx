@@ -26,15 +26,15 @@ export default function MovementsPage({
   return (
     <div className="space-y-4">
       <div className="ops-panel rounded-2xl p-4">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-100 flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-semibold text-slate-100">
               Aircraft Movements
             </h2>
             <div className="text-sm text-slate-400">Log and dispatch stand movements.</div>
           </div>
           <div className="ops-pill rounded-xl px-3 py-1.5 text-sm text-slate-300">
-            {currentUserHistoryLength} records total
+            {currentUserHistoryLength} records
           </div>
         </div>
       </div>

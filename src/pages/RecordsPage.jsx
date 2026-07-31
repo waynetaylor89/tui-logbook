@@ -86,6 +86,11 @@ export default function RecordsPage({
     return dateSortDirection === "asc" ? leftTime - rightTime : rightTime - leftTime;
   });
 
+  // only show filter tabs for types that appear in history
+  const loggedAircraftTypes = tuiAircraftTypes.filter((type) =>
+    Object.values(history || {}).flat().some((entry) => (entry.aircraft || "").includes(type))
+  );
+
   const displayTotal = sortedHistory.length;
   const displayTotalPages = Math.max(1, Math.ceil(displayTotal / 10));
   const displayHistory = sortedHistory.slice((currentPage - 1) * 10, currentPage * 10);
@@ -100,16 +105,15 @@ export default function RecordsPage({
             </h2>
             <div className="text-sm text-slate-400">Review and update all logged stand movements.</div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-              className="rounded-xl border border-sky-400/40 bg-sky-500/15 px-3 py-1 text-sm text-sky-200 hover:bg-sky-500/25"
+              className="rounded-xl border border-sky-400/40 bg-sky-500/15 px-3 py-1.5 text-sm text-sky-200 hover:bg-sky-500/25"
             >
-              {showAdvancedSearch ? 'Hide' : 'Show'} Advanced Search
+              {showAdvancedSearch ? 'Hide' : 'Show'} Search
             </button>
             <div className="ops-pill rounded-xl px-3 py-1.5 text-sm text-slate-300">
-              {displayTotal} records total
-              {isAdvancedSearchActive && ' (filtered)'}
+              {displayTotal} records{isAdvancedSearchActive && ' (filtered)'}
             </div>
           </div>
         </div>
@@ -151,7 +155,7 @@ export default function RecordsPage({
           setSearchTerm={setSearchTerm}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          tuiAircraftTypes={tuiAircraftTypes}
+          tuiAircraftTypes={loggedAircraftTypes}
           totalPages={displayTotalPages}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}

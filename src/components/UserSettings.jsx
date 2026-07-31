@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FleetManager from "./FleetManager.jsx";
 
 const APP_VERSION = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "0.0.0";
 const APP_BUILD = typeof __APP_BUILD__ !== "undefined" ? __APP_BUILD__ : "0";
@@ -22,7 +23,14 @@ const UserSettings = ({
   onToggleBackupReminders,
   selectedAirline = "TUI Airways",
   showOtherAirlines = false,
-  onSetShowOtherAirlines
+  onSetShowOtherAirlines,
+  newReg,
+  setNewReg,
+  newType,
+  setNewType,
+  tuiAircraftTypes = [],
+  onAddAircraftToFleet,
+  onResetFleet,
 }) => {
   const [message, setMessage] = useState("");
   const [notificationEnabled, setNotificationEnabled] = useState(notificationPreferences?.enabled ?? true);
@@ -219,6 +227,18 @@ const UserSettings = ({
         <div className="mb-2 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-right text-xs text-slate-400">
           <div>App Version {APP_VERSION}</div>
           <div className="mt-1">Build {APP_BUILD} ({APP_REVISION})</div>
+        </div>
+
+        <div className="mt-6">
+          <FleetManager
+            newReg={newReg}
+            setNewReg={setNewReg}
+            newType={newType}
+            setNewType={setNewType}
+            tuiAircraftTypes={tuiAircraftTypes}
+            addAircraftToFleet={onAddAircraftToFleet}
+            resetFleet={onResetFleet}
+          />
         </div>
 
         {message && (

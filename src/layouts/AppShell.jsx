@@ -24,15 +24,15 @@ export default function AppShell({ fleetCount, currentUser, isAdmin, onLogout, d
 
   return (
     <div className={`min-h-screen bg-gradient-to-br ${shellTheme} ops-grid-bg`}>
-      <div className="min-h-screen p-3 lg:p-6">
-        <div className="max-w-7xl mx-auto space-y-4 rounded-3xl border border-cyan-900/60 bg-slate-950/55 p-3 sm:p-4 lg:p-6 backdrop-blur-sm shadow-[0_0_35px_rgba(6,182,212,0.15)]">
+      <div className="min-h-screen p-2 sm:p-3 lg:p-6">
+        <div className="max-w-7xl mx-auto space-y-3 rounded-3xl border border-cyan-900/60 bg-slate-950/55 p-2 sm:p-4 lg:p-6 backdrop-blur-sm shadow-[0_0_35px_rgba(6,182,212,0.15)]">
           {/* Mobile Navigation */}
-          <div className="lg:hidden rounded-2xl shadow-lg p-4 border bg-slate-900/85 border-cyan-900/60">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h1 className="text-lg font-bold" style={{ color: AVIATION_COLORS.accent }}>TUI Logbook</h1>
+          <div className="lg:hidden rounded-2xl shadow-lg p-3 border bg-slate-900/85 border-cyan-900/60">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h1 className="text-base font-bold" style={{ color: AVIATION_COLORS.accent }}>TUI Logbook</h1>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               <NavLink to="/" end className={mobileNavClass}>
                 Home
               </NavLink>
@@ -77,7 +77,7 @@ export default function AppShell({ fleetCount, currentUser, isAdmin, onLogout, d
             </div>
           </div>
           <Header fleetCount={fleetCount} currentUser={currentUser} isAdmin={isAdmin} onLogout={onLogout} />
-          <div className="rounded-2xl border border-cyan-900/60 bg-slate-900/80 p-4 shadow-xl">
+          <div className="rounded-2xl border border-cyan-900/60 bg-slate-900/80 p-3 sm:p-4 shadow-xl">
             <Outlet />
           </div>
         </div>

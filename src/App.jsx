@@ -531,13 +531,6 @@ export default function AircraftMovementLogbook() {
               stats={stats}
               history={history}
               lastEntryTimestamp={lastEntryTimestamp}
-              newReg={newReg}
-              setNewReg={setNewReg}
-              newType={newType}
-              setNewType={setNewType}
-              tuiAircraftTypes={TUI_AIRCRAFT_TYPES}
-              handleAddAircraftToFleet={handleAddAircraftToFleet}
-              handleResetFleet={handleResetFleet}
             />
           }
         />
@@ -638,6 +631,13 @@ export default function AircraftMovementLogbook() {
               movementCount={currentUserHistory.length}
               backupRemindersEnabled={backupRemindersEnabled}
               onToggleBackupReminders={(value) => setBackupRemindersEnabled(value)}
+              newReg={newReg}
+              setNewReg={setNewReg}
+              newType={newType}
+              setNewType={setNewType}
+              tuiAircraftTypes={TUI_AIRCRAFT_TYPES}
+              onAddAircraftToFleet={handleAddAircraftToFleet}
+              onResetFleet={handleResetFleet}
             />
           }
         />

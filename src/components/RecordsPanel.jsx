@@ -102,7 +102,7 @@ export default function RecordsPanel({
               setActiveTab("ALL");
               setCurrentPage(1);
             }}
-            className={`px-4 py-2 rounded-xl font-semibold ${
+            className={`px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-xl font-semibold ${
               activeTab === "ALL"
                 ? "bg-sky-500/20 text-sky-100 border border-sky-400/50"
                 : "border border-slate-700 bg-slate-900/50 text-slate-300"
@@ -118,7 +118,7 @@ export default function RecordsPanel({
                 setActiveTab(type);
                 setCurrentPage(1);
               }}
-              className={`px-4 py-2 rounded-xl font-semibold ${
+              className={`px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-xl font-semibold ${
                 activeTab === type
                   ? "bg-sky-500/20 text-sky-100 border border-sky-400/50"
                   : "border border-slate-700 bg-slate-900/50 text-slate-300"

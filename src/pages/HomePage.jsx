@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import FleetManager from "../components/FleetManager.jsx";
 import { DailyTrendChart } from "../components/Charts.jsx";
 import { getAircraftTypeCountdowns } from "../utils/dateUtils.js";
 
@@ -9,13 +8,6 @@ export default function HomePage({
   stats,
   history,
   lastEntryTimestamp,
-  newReg,
-  setNewReg,
-  newType,
-  setNewType,
-  tuiAircraftTypes,
-  handleAddAircraftToFleet,
-  handleResetFleet,
 }) {
   const [now, setNow] = useState(Date.now());
   const [trainingState, setTrainingState] = useState({
@@ -42,59 +34,52 @@ export default function HomePage({
   }, [countdownSections]);
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-2xl border border-cyan-900/60 bg-slate-900/80 p-4 sm:p-5 shadow-lg space-y-4">
+    <div className="space-y-3 sm:space-y-5">
+      <section className="rounded-2xl border border-cyan-900/60 bg-slate-900/80 p-3 sm:p-5 shadow-lg space-y-3 sm:space-y-4">
         <div className="rounded-xl border border-cyan-800/60 bg-slate-950/70 px-4 py-3">
-          <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/70">Countdown Since Last Entry Into System</div>
+          <div className="text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.2em] text-cyan-300/70">Countdown Since Last Entry Into System</div>
           {countdownSections.length > 0 ? (
             <>
-              <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <div className="mt-3 grid gap-2 grid-cols-1">
                 {countdownSections.map((section) => {
                   const isTrainingSection = section.key === "737" || section.key === "787-800" || section.key === "787-900";
                   const isTrained = trainingState[section.key] || false;
 
                   return (
-                    <div key={section.key} className="rounded-lg border border-cyan-800/50 bg-slate-900/70 p-3">
-                      <div className="text-[10px] uppercase tracking-[0.25em] text-cyan-400/70">{section.label}</div>
-                      <div className="mt-1 text-xl font-semibold text-cyan-100">
-                        {section.days} {section.days === 1 ? "day" : "days"}
+                    <div key={section.key} className="rounded-lg border border-cyan-800/50 bg-slate-900/70 p-2 sm:p-3 flex items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.25em] text-cyan-400/70">{section.label}</div>
+                        <div className="mt-0.5 text-lg sm:text-xl font-semibold text-cyan-100">
+                          {section.days} {section.days === 1 ? "day" : "days"}
+                        </div>
                       </div>
-                      {section.isExpired && (
-                        <div className="mt-2 inline-flex rounded-full border border-red-400/50 bg-red-500/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-red-300">
-                          Expired
-                        </div>
-                      )}
-                      {isTrainingSection && (
-                        <div className={section.isExpired ? "mt-2 rounded-md border border-cyan-800/40 bg-slate-950/60 p-2" : "mt-3 rounded-md border border-cyan-800/40 bg-slate-950/60 p-2"}>
-                          <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-400/70">
-                            {section.key === "737"
-                              ? section.isExpired
-                                ? "Expired"
-                                : "Active"
-                              : section.isExpired
-                                ? isTrained
-                                  ? "Re-trained"
-                                  : "Expired"
-                                : isTrained
-                                  ? "Trained"
-                                  : "Not trained"}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {section.isExpired && (
+                          <div className="inline-flex rounded-full border border-red-400/50 bg-red-500/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-red-300">
+                            Expired
                           </div>
-                          <label className="mt-2 flex items-center gap-2 text-sm text-slate-300">
-                            <input
-                              type="checkbox"
-                              checked={isTrained}
-                              onChange={() =>
-                                setTrainingState((current) => ({
-                                  ...current,
-                                  [section.key]: !current[section.key],
-                                }))
-                              }
-                              className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
-                            />
-                            <span>{section.key === "737" ? "Retrained" : "Trained"}</span>
-                          </label>
-                        </div>
-                      )}
+                        )}
+                        {isTrainingSection && (
+                          <div className="rounded-md border border-cyan-800/40 bg-slate-950/60 px-2 py-1.5">
+                            <label className="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={isTrained}
+                                onChange={() =>
+                                  setTrainingState((current) => ({
+                                    ...current,
+                                    [section.key]: !current[section.key],
+                                  }))
+                                }
+                                className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-500 focus:ring-cyan-500"
+                              />
+                              <span className="text-[10px] uppercase tracking-[0.1em] text-cyan-400/70">
+                                {section.key === "737" ? "Retrained" : isTrained ? "Trained" : "Untrained"}
+                              </span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -147,18 +132,6 @@ export default function HomePage({
         </section>
       )}
 
-      <section className="grid lg:grid-cols-3 gap-4">
-        <FleetManager
-          newReg={newReg}
-          setNewReg={setNewReg}
-          newType={newType}
-          setNewType={setNewType}
-          tuiAircraftTypes={tuiAircraftTypes}
-          addAircraftToFleet={handleAddAircraftToFleet}
-          resetFleet={handleResetFleet}
-        />
-        <div className="hidden lg:block"></div>
-      </section>
     </div>
   );
 }
