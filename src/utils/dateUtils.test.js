@@ -38,4 +38,23 @@ describe("getCountdownStatus", () => {
     expect(section800?.days).toBe(0);
     expect(section900?.days).toBe(0);
   });
+
+  it("parses european movement date and time when createdAt is missing", () => {
+    const now = new Date("2026-08-07T12:00:00Z").getTime();
+    const history = {
+      alice: [
+        {
+          aircraft: "G-ABC - Boeing 737-800",
+          movementDate: "21/06/2026",
+          movementTime: "15.19",
+        },
+      ],
+    };
+
+    const result = getAircraftTypeCountdowns(history, now);
+    const section737 = result.find((section) => section.key === "737");
+
+    expect(section737?.days).toBeGreaterThan(0);
+    expect(section737?.lastEntryLabel?.startsWith("21/06/2026")).toBe(true);
+  });
 });

@@ -29,7 +29,15 @@ export default function HomePage({
   }, [history, lastEntryTimestamp, now]);
 
   const latestLabel = useMemo(() => {
-    const latestEntry = countdownSections.find((section) => section.lastEntryLabel);
+    const latestTimestamp = countdownSections.reduce((latest, section) => {
+      const sectionTimestamp = section.lastEntryTimestamp;
+      if (!sectionTimestamp) return latest;
+      return latest === null || sectionTimestamp > latest ? sectionTimestamp : latest;
+    }, null);
+
+    if (!latestTimestamp) return "No entries found yet.";
+
+    const latestEntry = countdownSections.find((section) => section.lastEntryTimestamp === latestTimestamp);
     return latestEntry?.lastEntryLabel || "No entries found yet.";
   }, [countdownSections]);
 

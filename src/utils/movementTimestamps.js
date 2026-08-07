@@ -4,7 +4,8 @@ const padDatePart = (value) => String(value).padStart(2, "0");
 
 const normalizeTimeValue = (timeValue = "") => {
   const rawTime = String(timeValue || "").trim();
-  const match = rawTime.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  const dottedTime = rawTime.replace(/\./g, ":");
+  const match = dottedTime.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
   if (!match) return rawTime;
   return `${padDatePart(match[1])}:${match[2]}:${match[3] || "00"}`;
 };
@@ -18,15 +19,15 @@ const parseDateParts = (dateValue, fallbackYear = new Date().getFullYear()) => {
     return { year, month, day };
   }
 
-  const dottedMatch = rawDate.match(/^(\d{1,2})\.(\d{1,2})(?:\.(\d{2}|\d{4}))?$/);
-  if (!dottedMatch) return null;
+  const separatedMatch = rawDate.match(/^(\d{1,2})[./-](\d{1,2})(?:[./-](\d{2}|\d{4}))?$/);
+  if (!separatedMatch) return null;
 
-  const day = Number(dottedMatch[1]);
-  const month = Number(dottedMatch[2]);
+  const day = Number(separatedMatch[1]);
+  const month = Number(separatedMatch[2]);
   let year = fallbackYear;
 
-  if (dottedMatch[3]) {
-    year = dottedMatch[3].length === 2 ? 2000 + Number(dottedMatch[3]) : Number(dottedMatch[3]);
+  if (separatedMatch[3]) {
+    year = separatedMatch[3].length === 2 ? 2000 + Number(separatedMatch[3]) : Number(separatedMatch[3]);
   }
 
   return { year, month, day };
